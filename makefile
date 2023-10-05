@@ -3,9 +3,9 @@ CC = gcc
 CXX = g++
 
 # Set flags
-CFLAGS = -Wall
+CFLAGS = -Wall -I/usr/local/include
 CXXFLAGS = -Wall
-LDFLAGS = -lstdc++
+LDFLAGS = -lstdc++ -lsndfile -L/usr/local/lib
 
 # Set the names of your source, object, and executable files
 C_SRC = ./src/c/main.c

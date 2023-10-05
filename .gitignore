@@ -5,5 +5,9 @@
 bin/**/*
 
 // DS_STORE
-
 **/.DS_STORE
+
+// misc
+compile_flags.txt // clangd helper - LSP integration
+gtfam.WAV
+
