@@ -1,1 +1,5 @@
-./**/*.o
+// object files
+**/*.o
+
+// bin
+bin/**/*
