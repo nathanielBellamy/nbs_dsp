@@ -39,9 +39,10 @@ static int callback(const void *inputBuffer, void *outputBuffer,
   else
   {
       for (i = 0; i < framesPerBuffer; i++) {
-        *out++ = paData->buffer[paData->index * paData->sfinfo.channels];  // Mono for simplicity
-        *out++ = paData->buffer[(paData->index * paData->sfinfo.channels) + 1];  // Mono for simplicity
-        paData->index = paData->index + 2;
+        for (int ch = 0; ch < paData->sfinfo.channels; ch++) {
+          *out++ = paData->buffer[paData->index * paData->sfinfo.channels + ch];
+        }
+        paData->index++;
       }
   }
 
