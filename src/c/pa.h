@@ -3,7 +3,7 @@
 #include <stdio.h>
 #include <portaudio.h>
 
-int pa(void);
+int pa(const void *inputBuffer, int *sampleRate);
 
 #endif
 

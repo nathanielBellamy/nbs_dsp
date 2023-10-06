@@ -5,7 +5,7 @@
 #include "../cpp/foo.h"
 
 // pa.h
-int pa(void);
+int pa(const void *inputBuffer, int *sampleRate);
 
 // ../cpp/foo.h
 void bar(void);
@@ -47,7 +47,7 @@ int main(void) {
 
   // TODO:
   //  send buffer and sample/channel info to portaudio here
-  if ( pa() != 0 )
+  if ( pa(&buffer, &sfinfo.samplerate) != 0 )
   {
     return 1;
   }
