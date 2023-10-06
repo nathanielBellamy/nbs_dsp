@@ -1,11 +1,17 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <sndfile.h>
+#include "pa.h"
 #include "../cpp/foo.h"
 
-void bar();
+// pa.h
+int pa(void);
 
-int main() {
+// ../cpp/foo.h
+void bar(void);
+
+int main(void);
+int main(void) {
   bar();
   
   SNDFILE *file;
@@ -38,6 +44,13 @@ int main() {
   
   printf("readcount: %ld\n", readcount);
   printf("buffer: %i\n", buffer[5]);
+
+  // TODO:
+  //  send buffer and sample/channel info to portaudio here
+  if ( pa() != 0 )
+  {
+    return 1;
+  }
 
   // Cleanup
   free(buffer);

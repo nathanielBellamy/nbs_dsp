@@ -5,10 +5,10 @@ CXX = g++
 # Set flags
 CFLAGS = -Wall -I/usr/local/include
 CXXFLAGS = -Wall
-LDFLAGS = -lstdc++ -lsndfile -L/usr/local/lib
+LDFLAGS = -lstdc++ -lsndfile -lportaudio -L/usr/local/lib
 
 # Set the names of your source, object, and executable files
-C_SRC = ./src/c/main.c
+C_SRC = ./src/c/main.c ./src/c/pa.c
 CXX_SRC = ./src/cpp/foo.cpp
 HEADER = ./src/cpp/foo.h
 OBJ = $(C_SRC:.c=.o) $(CXX_SRC:.cpp=.o)
