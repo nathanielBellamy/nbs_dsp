@@ -33,17 +33,17 @@ int main(void) {
   printf("Frames: %lli \n", sfinfo.frames);
   
   // Allocate memory for data
-  int *buffer = malloc(sfinfo.frames * sfinfo.channels * sizeof(int));
+  float *buffer = malloc(sfinfo.frames * sfinfo.channels * sizeof(float));
   if (!buffer) {
       printf("Cannot allocate memory\n");
       return 1;
   }
 
-  // Read the audio data
-  long readcount = sf_read_int(file, buffer, sfinfo.frames * sfinfo.channels);
+  // Read the audio data into buffer
+  long readcount = sf_read_float(file, buffer, sfinfo.frames * sfinfo.channels);
   
   printf("readcount: %ld\n", readcount);
-  printf("buffer: %i\n", buffer[5]);
+  printf("buffer: %f\n", buffer[10]);
 
   // TODO:
   //  send buffer and sample/channel info to portaudio here

@@ -4,8 +4,6 @@
 
 // following: https://github.com/PortAudio/portaudio/blob/master/examples/pa_fuzz.c
 
-// TODO:
-//  these should be passed in based on the results of libsndfile
 #define PA_SAMPLE_TYPE      paFloat32
 #define FRAMES_PER_BUFFER   (64)
 
@@ -20,16 +18,15 @@ static int callback(const void *inputBuffer, void *outputBuffer,
                     void *userData )
 {
   SAMPLE *out = (SAMPLE*)outputBuffer;
-  // const SAMPLE *in = (const SAMPLE*)inputBuffer;
   unsigned int i;
   (void) inputBuffer;
   (void) timeInfo; /* Prevent unused variable warnings. */
   (void) statusFlags;
-  int *data = userData;
+  const SAMPLE *fileBuffer = userData;
 
-  int iMax = bufferIdx + framesPerBuffer;
+  int iMax = bufferIdx + framesPerBuffer - 1;
 
-  if( data == NULL )
+  if( fileBuffer == NULL )
   {
       for( i=bufferIdx; i<iMax; i++ )
       {
@@ -37,19 +34,18 @@ static int callback(const void *inputBuffer, void *outputBuffer,
           *out++ = 0;  /* right - silent */
       }
   }
-  else
+  else 
   {
       for( i=bufferIdx; i<iMax; i++ )
       {
-          SAMPLE sampleLeft = data[i];
+          SAMPLE sampleLeft = fileBuffer[i];
           *out++ = sampleLeft; // place left
-          SAMPLE sampleRight = data[i];
+          SAMPLE sampleRight = fileBuffer[i+1];
           *out++ = sampleRight; // place right
-          
-          bufferIdx += 2;
       }
   }
 
+  bufferIdx += 2;
   return paContinue;
 }
 
