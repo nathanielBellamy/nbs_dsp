@@ -1,6 +1,7 @@
 #include <stdio.h>
 #include <portaudio.h>
 #include "pa.h"
+#include "pa_data.h"
 
 // following: https://github.com/PortAudio/portaudio/blob/master/examples/pa_fuzz.c
 
@@ -49,7 +50,7 @@ static int callback(const void *inputBuffer, void *outputBuffer,
   return paContinue;
 }
 
-int pa(const void *inputBuffer, int *sampleRate)
+int pa(PA_DATA *paData)
 {
   PaStreamParameters inputParameters, outputParameters;
   PaStream *stream;
@@ -82,11 +83,11 @@ int pa(const void *inputBuffer, int *sampleRate)
             &stream,
             &inputParameters,
             &outputParameters,
-            *sampleRate,
+            paData->sfinfo.samplerate,
             FRAMES_PER_BUFFER,
             0, /* paClipOff, */  /* we won't output out of range samples so don't bother clipping them */
             callback, // TODO
-            &inputBuffer );
+            paData->buffer );
   if( err != paNoError ) goto error;
 
   err = Pa_StartStream( stream );

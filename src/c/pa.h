@@ -2,8 +2,9 @@
 #define PA_H
 #include <stdio.h>
 #include <portaudio.h>
+#include "pa_data.h"
 
-int pa(const void *inputBuffer, int *sampleRate);
+int pa(PA_DATA *paData);
 
 #endif
 
