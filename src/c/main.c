@@ -17,6 +17,7 @@ int main(void) {
   
   PA_DATA paData;
   paData.index = 0;
+  paData.buffer_frames = 32;
   printf("padidx: %lli", paData.index);
 
   if (! (paData.file = sf_open("gtfam.wav", SFM_READ, &paData.sfinfo)))
@@ -43,12 +44,13 @@ int main(void) {
   long readcount = sf_read_float(paData.file, paData.buffer, paData.sfinfo.frames * paData.sfinfo.channels);
   
   printf("readcount: %ld\n", readcount);
-  printf("buffer: %f\n", paData.buffer[10]);
 
   // TODO:
   //  send buffer and sample/channel info to portaudio here
   if ( pa(&paData) != 0 )
   {
+    free(paData.buffer);
+    sf_close(paData.file);
     return 1;
   }
 

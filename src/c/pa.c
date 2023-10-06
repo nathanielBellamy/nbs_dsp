@@ -38,8 +38,7 @@ static int callback(const void *inputBuffer, void *outputBuffer,
   // }
   else
   {
-      for (i = 0; i < framesPerBuffer - 1; i++) {
-        // printf("buff: %f \n", paData->buffer[paData->index * paData->sfinfo.channels]);
+      for (i = 0; i < framesPerBuffer; i++) {
         *out++ = paData->buffer[paData->index * paData->sfinfo.channels];  // Mono for simplicity
         *out++ = paData->buffer[(paData->index * paData->sfinfo.channels) + 1];  // Mono for simplicity
         paData->index = paData->index + 2;
@@ -56,9 +55,9 @@ int pa(PA_DATA *paData)
   PaStream *stream;
   PaError err;
   
-  printf("pa_buffer: %f \n", paData->buffer[1008900]);
   printf("pa_buff_frames: %lli \n", paData->buffer_frames);
   printf("pa_idx: %lli \n", paData->index);
+  printf("pa_samplerate: %i \n", paData->sfinfo.samplerate);
 
   err = Pa_Initialize();
   if( err != paNoError ) goto error;
@@ -87,8 +86,8 @@ int pa(PA_DATA *paData)
             &inputParameters,
             &outputParameters,
             paData->sfinfo.samplerate,
-            FRAMES_PER_BUFFER,
-            0, /* paClipOff, */  /* we won't output out of range samples so don't bother clipping them */
+            paData->buffer_frames,
+            paNoFlag, /* paClipOn, */   
             callback,
             paData );
   if( err != paNoError ) goto error;
