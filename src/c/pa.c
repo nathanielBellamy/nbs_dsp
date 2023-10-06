@@ -2,6 +2,8 @@
 #include <portaudio.h>
 #include "pa.h"
 
+// following: https://github.com/PortAudio/portaudio/blob/master/examples/pa_fuzz.c
+
 // TODO:
 //  these should be passed in based on the results of libsndfile
 #define SAMPLE_RATE         (44100)
