@@ -15,12 +15,9 @@ int main(void);
 int main(void) {
   bar();
   
-  SNDFILE *file;
-  SF_INFO sfinfo;
-
   PA_DATA paData;
-
-  sfinfo.format = 0;
+  paData.index = 0;
+  printf("padidx: %lli", paData.index);
 
   if (! (paData.file = sf_open("gtfam.wav", SFM_READ, &paData.sfinfo)))
   {
@@ -36,7 +33,7 @@ int main(void) {
   printf("Frames: %lli \n", paData.sfinfo.frames);
   
   // Allocate memory for data
-  paData.buffer = malloc(paData.sfinfo.frames * paData.sfinfo.channels * sizeof(float));
+  paData.buffer = (float *) malloc(paData.sfinfo.frames * paData.sfinfo.channels * sizeof(float));
   if (!paData.buffer) {
       printf("Cannot allocate memory\n");
       return 1;
@@ -56,8 +53,12 @@ int main(void) {
   }
 
   // Cleanup
+  //
+  printf("\n\n\nCleaning up resources...");
   free(paData.buffer);
-  sf_close(file);
+  sf_close(paData.file);
 
+
+  printf("\nDone.");
   return 0;
 }
