@@ -53,7 +53,6 @@ int main(void) {
   }
 
   // Cleanup
-  //
   printf("\nCleaning up resources...");
   free(paData.buffer);
   sf_close(paData.file);
