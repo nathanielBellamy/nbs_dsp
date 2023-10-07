@@ -1,4 +1,6 @@
 #include <stdio.h>
+#include <stdlib.h>
+#include <stdbool.h>
 #include <portaudio.h>
 #include "pa.h"
 #include "pa_data.h"
@@ -6,7 +8,6 @@
 // following: https://github.com/PortAudio/portaudio/blob/master/examples/pa_fuzz.c
 
 #define PA_SAMPLE_TYPE      paFloat32
-#define FRAMES_PER_BUFFER   (64)
 
 typedef float SAMPLE;
 
@@ -31,16 +32,16 @@ static int callback(const void *inputBuffer, void *outputBuffer,
           *out++ = 0;  /* right - silent */
       }
   }
-  // else if (paData->index >= paData->buffer_frames) 
-  // {
-  //   // paData->index = 0;
-  //   return paComplete;
-  // }
+  else if (paData->index >= paData->sfinfo.frames) 
+  {
+    paData->index = 0;
+    return paComplete;
+  }
   else
   {
       for (i = 0; i < framesPerBuffer; i++) {
         for (int ch = 0; ch < paData->sfinfo.channels; ch++) {
-          *out++ = paData->buffer[paData->index * paData->sfinfo.channels + ch];
+          *out++ = (paData->buffer[paData->index * paData->sfinfo.channels + ch]);
         }
         paData->index++;
       }
@@ -56,9 +57,9 @@ int pa(PA_DATA *paData)
   PaStream *stream;
   PaError err;
   
-  printf("pa_buff_frames: %lli \n", paData->buffer_frames);
-  printf("pa_idx: %lli \n", paData->index);
   printf("pa_samplerate: %i \n", paData->sfinfo.samplerate);
+  printf("pa_buff_frames: %lli \n", paData->buffer_frames);
+  printf("pa_format: %i \n", paData->sfinfo.format);
 
   err = Pa_Initialize();
   if( err != paNoError ) goto error;
@@ -97,16 +98,32 @@ int pa(PA_DATA *paData)
   if( err != paNoError ) goto error;
 
   printf("Hit ENTER to stop program.\n");
-  getchar();
-  err = Pa_CloseStream( stream );
-  if( err != paNoError ) goto error;
-  printf("pa_idx_2: %lli \n", paData->index);
+  char c;
+  while( (c = getchar()) != '\n' && c != EOF ) 
+  {
+    if( !Pa_IsStreamActive(stream) )
+    {
+      goto handlePaComplete;
+    }
+  }
+  goto cleanup;
 
-  Pa_Terminate();
-  return 0;
+  handlePaComplete:
+    err = Pa_StopStream( stream );
+    if( err != paNoError ) goto error;
+    goto cleanup;
+
+  cleanup:
+    err = Pa_CloseStream( stream );
+    if( err != paNoError ) goto error;
+    printf("pa_idx_2: %lli \n", paData->index);
+
+    Pa_Terminate();
+    return 0;
 
   error:
     Pa_Terminate();
+    free(paData->buffer);
     fprintf( stderr, "An error occurred while using the portaudio stream\n" );
     fprintf( stderr, "Error number: %d\n", err );
     fprintf( stderr, "Error message: %s\n", Pa_GetErrorText( err ) );

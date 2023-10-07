@@ -45,8 +45,6 @@ int main(void) {
   
   printf("readcount: %ld\n", readcount);
 
-  // TODO:
-  //  send buffer and sample/channel info to portaudio here
   if ( pa(&paData) != 0 )
   {
     free(paData.buffer);
@@ -56,10 +54,9 @@ int main(void) {
 
   // Cleanup
   //
-  printf("\n\n\nCleaning up resources...");
+  printf("\nCleaning up resources...");
   free(paData.buffer);
   sf_close(paData.file);
-
 
   printf("\nDone.");
   return 0;
