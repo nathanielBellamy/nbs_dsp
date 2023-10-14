@@ -72,8 +72,7 @@ static int callback(const void *inputBuffer, void *outputBuffer,
       // normalize fft_time 
       // write out to paData->fft_buffer
       for (i = 0; i < framesPerBuffer; i++) {
-        paData->fft_time[i] = paData->fft_time[i] / 32.0f;
-        paData->fft_buffer[i * paData->sfinfo.channels + ch] = paData->fft_time[i];
+        paData->fft_buffer[i * paData->sfinfo.channels + ch] = paData->fft_time[i] / 32.0f;
       }
     }
     
