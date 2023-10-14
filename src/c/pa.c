@@ -60,9 +60,10 @@ static int callback(const void *inputBuffer, void *outputBuffer,
       fftwf_execute(paData->fft_plan_to_freq);
 
       // mutate paData->fft_freq in place
-      // for (i = 20; i < framesPerBuffer + 2; i++) {
-      //   paData->fft_freq[i] = 0.0 + 0.0I;
-      // }
+      for (i = 0; i < 16; i++) {
+        paData->fft_freq[2*i] = paData->fft_freq[2*i] * 0.2f + paData->fft_freq[2*i + 1] * -0.3f;
+        paData->fft_freq[2*i +1] = paData->fft_freq[2*i] * -0.2f + paData->fft_freq[2*i + 1] * 0.1f;
+      }
 
       // transform back into time domain
       fftwf_execute(paData->fft_plan_to_time);
