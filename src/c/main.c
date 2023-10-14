@@ -36,7 +36,7 @@ int main(void) {
   paData.buffer_frames = 32;
   printf("padidx: %lli", paData.index);
 
-  if (! (paData.file = sf_open("gtfam.wav", SFM_READ, &paData.sfinfo)))
+  if (! (paData.file = sf_open("gtfam_mini.wav", SFM_READ, &paData.sfinfo)))
   {
 		printf ("Not able to open input file.\n") ;
 		/* Print the error message from libsndfile. */

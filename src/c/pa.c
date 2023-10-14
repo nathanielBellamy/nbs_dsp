@@ -24,7 +24,7 @@ static int callback(const void *inputBuffer, void *outputBuffer,
   (void) timeInfo; /* Prevent unused variable warnings. */
   (void) statusFlags;
   PA_DATA *paData = (PA_DATA *) userData;
-  PA_DATA paData_initial = *paData;
+  // PA_DATA paData_initial = *paData;
 
   if( paData->buffer == NULL )
   {
@@ -44,49 +44,43 @@ static int callback(const void *inputBuffer, void *outputBuffer,
     // process
     //
     // paData->buffer --copy--> paData->fft_buffer
-    for (i = 0; i < framesPerBuffer; i++) {
-      for (int ch = 0; ch < paData->sfinfo.channels; ch++) {
-        *paData->fft_buffer++ = (paData->buffer[i * paData->sfinfo.channels + ch]);
-      }
-      paData->fft_buffer = paData_initial.fft_buffer; // reset pointer to buffer start
+    for (i = 0; i < framesPerBuffer * paData->sfinfo.channels; i++) {
+      paData->fft_buffer[i] = paData->buffer[paData->index + i];
     }
 
-    // paData->fft_buffer --for each channel, copy--> paData->fft_time
+    // render fft for each channel
     for (int ch = 0; ch < paData->sfinfo.channels; ch++) {
       // copy channel into paData->fft_time
       for (i = 0; i < framesPerBuffer; i++) {
-        paData->fft_time[i] = paData->buffer[i * paData->sfinfo.channels + ch];
+        paData->fft_time[i] = paData->fft_buffer[i * paData->sfinfo.channels + ch];
       }
 
       // compute fft
       fftwf_execute(paData->fft_plan_to_freq);
 
       // mutate paData->fft_freq in place
-      for (i = 0; i < framesPerBuffer; i++) {
-        if (i > 30)// TODO: unmagic frequency cutoff
-        {
-          *paData->fft_freq[i] = 0.0f;
-        }
-      }
+      // for (i = 0; i < framesPerBuffer; i++) {
+      //   if (i > 30)// TODO: unmagic frequency cutoff
+      //   {
+      //     *paData->fft_freq[i] = 0.0f;
+      //   }
+      // }
 
       // transform back into time domain
       fftwf_execute(paData->fft_plan_to_time);
 
       // normalize fft_time 
-      for (i = 0; i < framesPerBuffer; i++) {
-        paData->fft_time[i] = paData->fft_time[i] / framesPerBuffer;
-      }
-      
       // write out to paData->fft_buffer
       for (i = 0; i < framesPerBuffer; i++) {
-        paData->buffer[i * paData->sfinfo.channels + ch] = paData->fft_time[i];
+        paData->fft_time[i] = paData->fft_time[i] / 32.0f;
+        paData->fft_buffer[i * paData->sfinfo.channels + ch] = paData->fft_time[i];
       }
     }
     
     // paData->fft_buffer --copy--> paOut
     for (i = 0; i < framesPerBuffer; i++) {
       for (int ch = 0; ch < paData->sfinfo.channels; ch++) {
-        *out++ = paData->fft_buffer[paData->index * paData->sfinfo.channels + ch];
+        *out++ = paData->fft_buffer[i * paData->sfinfo.channels + ch];
       }
       paData->index++;
     }
