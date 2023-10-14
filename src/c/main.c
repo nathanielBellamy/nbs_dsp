@@ -1,6 +1,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <sndfile.h>
+#include <fftw3.h>
 #include "pa.h"
 #include "pa_data.h"
 #include "../cpp/foo.h"
@@ -61,9 +62,9 @@ int main(void) {
   printf("readcount: %ld\n", readcount);
 
   // allocate memory to compute fast fourier transform in pa_callback
-  paData.fft_buffer = (float*) fftw_malloc(sizeof(float) * paData.buffer_frames * paData.sfinfo.channels);
-  paData.fft_time = (float*) fftw_malloc(sizeof(float) * paData.buffer_frames);
-  paData.fft_freq = (fftwf_complex*) fftw_malloc(sizeof(fftwf_complex) * paData.buffer_frames);
+  paData.fft_buffer = (float*) fftwf_malloc(sizeof(float) * paData.buffer_frames * paData.sfinfo.channels);
+  paData.fft_time = (float*) fftwf_malloc(sizeof(float) * paData.buffer_frames);
+  paData.fft_freq = (fftwf_complex*) fftwf_malloc(sizeof(fftwf_complex) * paData.buffer_frames);
   paData.fft_plan_to_freq = fftwf_plan_dft_r2c_1d(
     paData.buffer_frames, 
     paData.fft_time,

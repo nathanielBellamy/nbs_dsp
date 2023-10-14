@@ -2,6 +2,7 @@
 #include <stdlib.h>
 #include <stdbool.h>
 #include <portaudio.h>
+#include <fftw3.h>
 #include "pa.h"
 #include "pa_data.h"
 
