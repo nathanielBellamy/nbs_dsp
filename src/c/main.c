@@ -8,6 +8,20 @@
 // pa.h
 int pa(PA_DATA *paData);
 
+void freePaData(PA_DATA *paData);
+void freePaData(PA_DATA *paData) {
+  printf("\nCleaning up resources...");
+  
+  free(paData->buffer);
+  fftwf_free(paData->fft_freq);
+  fftwf_free(paData->fft_time);
+  fftwf_destroy_plan(paData->fft_plan_to_freq);
+  fftwf_destroy_plan(paData->fft_plan_to_time);
+  sf_close(paData->file);
+  
+  printf("\nDone.");
+};
+
 // ../cpp/foo.h
 void bar(void);
 
@@ -45,8 +59,6 @@ int main(void) {
   
   printf("readcount: %ld\n", readcount);
 
-  // TODO:
-  //
   paData.fft_time = (float*) fftw_malloc(sizeof(float) * paData.buffer_frames);
   paData.fft_freq = (fftwf_complex*) fftw_malloc(sizeof(fftwf_complex) * paData.buffer_frames);
   paData.fft_plan_to_freq = fftwf_plan_dft_r2c_1d(
@@ -55,28 +67,24 @@ int main(void) {
     paData.fft_freq, 
     FFTW_ESTIMATE
   );
-  // paData.fft_plan_to_time = 
+  paData.fft_plan_to_time = fftwf_plan_dft_c2r_1d(
+    paData.buffer_frames, 
+    paData.fft_freq, 
+    paData.fft_time,
+    FFTW_ESTIMATE
+  );
 
   if ( pa(&paData) != 0 )
   {
-    free(paData.buffer);
-    free(paData.fft_freq);
-    free(paData.fft_time);
-    fftwf_destroy_plan(paData.fft_plan_to_freq);
-    fftwf_destroy_plan(paData.fft_plan_to_time);
-    sf_close(paData.file);
+    // Log error
+    printf("\nportaudio encountered an error.");
+    
+    // Cleanup
+    freePaData(&paData);
     return 1;
   }
 
   // Cleanup
-  printf("\nCleaning up resources...");
-  free(paData.buffer);
-  free(paData.fft_freq);
-  free(paData.fft_time);
-  fftwf_destroy_plan(paData.fft_plan_to_freq);
-  fftwf_destroy_plan(paData.fft_plan_to_time);
-  sf_close(paData.file);
-
-  printf("\nDone.");
+  freePaData(&paData);
   return 0;
 }
