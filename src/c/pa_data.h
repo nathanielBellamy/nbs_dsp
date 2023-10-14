@@ -19,23 +19,23 @@ typedef struct {
   // - so we allocate what memory we need here
     fftwf_plan fft_plan_to_freq; // plan used to compute the FFT, (): time_domain -> freq_domain
     fftwf_plan fft_plan_to_time; // plan used to compute the FFT, (): freq_domain -> time_domain
-    float *fft_time; // - copy float paData.buffer being transformed this callback
-                   // - the fft_plan_to_freq will overwrite this array on execution
-                   //   - we do not rely upon these values after calling this plan
-                   //   - but the plan does not de-allocate memory (not allowed in pa_callback)  
-                   // - the fft_plan_to_time will output into this array
-                   // - the data is then read from here into the pa_out_buffer
+    float *fft_buffer; // - copy float paData.buffer being transformed this callback
+    float *fft_time; // - copy of channel data from paData.buffer being transformed this callback
+                     // - the fft_plan_to_freq will overwrite this array on execution
+                     //   - we do not rely upon these values after calling this plan
+                     //   - but the plan does not de-allocate memory (not allowed in pa_callback)  
+                     // - the fft_plan_to_time will output into this array
     fftwf_complex *fft_freq; // array storing results of fft
-                            // to be read into pa out buffer while
-                            //   - mapping back to time domain
-                            //   - normalizing to unit values - factor of paData.sf_info.buffer_frames
-                            // paData.buffer --copy--> 
-                            //   paData.fft_time --fft_plan_to_freq--> 
-                            //     paData.fft_freq --destructive, in-place, "fx" transformation-->
-                            //       paData.fft_freq --fft_plan_to_time-->
-                            //         paData.fft_time --normalize--> 
-                            //           paData.fft_time --copy--> 
-                            //             pa_out
+    
+  // paData.buffer --copy--> 
+  //   paData.fft_buffer --for each channel, copy-->
+  //     paData.fft_time --fft_plan_to_freq--> 
+  //       paData.fft_freq --destructive, in-place, "fx" transformation-->
+  //         paData.fft_freq --fft_plan_to_time-->
+  //           paData.fft_time --normalize--> 
+  //             paData.fft_time --copy into indices mod channel count (interwoven)--> 
+  //              paData.fft_buffer --copy-->
+  //                pa_out                
 } PA_DATA;
 
 #endif

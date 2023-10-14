@@ -13,8 +13,9 @@ void freePaData(PA_DATA *paData) {
   printf("\nCleaning up resources...");
   
   free(paData->buffer);
-  fftwf_free(paData->fft_freq);
+  fftwf_free(paData->fft_buffer);
   fftwf_free(paData->fft_time);
+  fftwf_free(paData->fft_freq);
   fftwf_destroy_plan(paData->fft_plan_to_freq);
   fftwf_destroy_plan(paData->fft_plan_to_time);
   sf_close(paData->file);
@@ -59,6 +60,8 @@ int main(void) {
   
   printf("readcount: %ld\n", readcount);
 
+  // allocate memory to compute fast fourier transform in pa_callback
+  paData.fft_buffer = (float*) fftw_malloc(sizeof(float) * paData.buffer_frames * paData.sfinfo.channels);
   paData.fft_time = (float*) fftw_malloc(sizeof(float) * paData.buffer_frames);
   paData.fft_freq = (fftwf_complex*) fftw_malloc(sizeof(fftwf_complex) * paData.buffer_frames);
   paData.fft_plan_to_freq = fftwf_plan_dft_r2c_1d(
