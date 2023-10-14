@@ -2,6 +2,7 @@
 #include <stdlib.h>
 #include <stdbool.h>
 #include <portaudio.h>
+#include <complex.h>
 #include <fftw3.h>
 #include "pa.h"
 #include "pa_data.h"
@@ -59,11 +60,8 @@ static int callback(const void *inputBuffer, void *outputBuffer,
       fftwf_execute(paData->fft_plan_to_freq);
 
       // mutate paData->fft_freq in place
-      // for (i = 0; i < framesPerBuffer; i++) {
-      //   if (i > 30)// TODO: unmagic frequency cutoff
-      //   {
-      //     *paData->fft_freq[i] = 0.0f;
-      //   }
+      // for (i = 20; i < framesPerBuffer + 2; i++) {
+      //   paData->fft_freq[i] = 0.0 + 0.0I;
       // }
 
       // transform back into time domain
@@ -95,16 +93,16 @@ int pa(PA_DATA *paData)
   PaStream *stream;
   PaError err;
   
-  printf("pa_samplerate: %i \n", paData->sfinfo.samplerate);
-  printf("pa_buff_frames: %lli \n", paData->buffer_frames);
-  printf("pa_format: %i \n", paData->sfinfo.format);
+  printf("\npa_samplerate: %i", paData->sfinfo.samplerate);
+  printf("\npa_buff_frames: %lli", paData->buffer_frames);
+  printf("\npa_format: %i", paData->sfinfo.format);
 
   err = Pa_Initialize();
   if( err != paNoError ) goto error;
 
   inputParameters.device = Pa_GetDefaultInputDevice(); /* default input device */
   if (inputParameters.device == paNoDevice) {
-      fprintf(stderr,"Error: No default input device.\n");
+      fprintf(stderr,"\nError: No default input device.");
       goto error;
   }
   inputParameters.channelCount = 2;       /* stereo in from file */
@@ -113,7 +111,7 @@ int pa(PA_DATA *paData)
 
   outputParameters.device = Pa_GetDefaultOutputDevice(); /* default output device */
   if (outputParameters.device == paNoDevice) {
-      fprintf(stderr,"Error: No default output device.\n");
+      fprintf(stderr,"\nError: No default output device.");
       goto error;
   }
   outputParameters.channelCount = 2;       /* stereo output */
@@ -135,7 +133,7 @@ int pa(PA_DATA *paData)
   err = Pa_StartStream( stream );
   if( err != paNoError ) goto error;
 
-  printf("Hit ENTER to stop program.\n");
+  printf("\nHit ENTER to stop program.");
   char c;
   while( (c = getchar()) != '\n' && c != EOF ) 
   {
@@ -161,8 +159,8 @@ int pa(PA_DATA *paData)
 
   error:
     Pa_Terminate();
-    fprintf( stderr, "An error occurred while using the portaudio stream\n" );
-    fprintf( stderr, "Error number: %d\n", err );
-    fprintf( stderr, "Error message: %s\n", Pa_GetErrorText( err ) );
+    fprintf( stderr, "\nAn error occurred while using the portaudio stream" );
+    fprintf( stderr, "\nError number: %d", err );
+    fprintf( stderr, "\nError message: %s", Pa_GetErrorText( err ) );
     return -1;
 }

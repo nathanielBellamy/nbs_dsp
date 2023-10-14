@@ -34,7 +34,7 @@ int main(void) {
   PA_DATA paData;
   paData.index = 0;
   paData.buffer_frames = 32;
-  printf("padidx: %lli", paData.index);
+  printf("\npadidx: %lli", paData.index);
 
   if (! (paData.file = sf_open("gtfam_mini.wav", SFM_READ, &paData.sfinfo)))
   {
@@ -45,21 +45,21 @@ int main(void) {
   };
   
   // Display some information about the file.
-  printf("Sample rate: %d \n", paData.sfinfo.samplerate);
-  printf("Channels: %d \n", paData.sfinfo.channels);
-  printf("Frames: %lli \n", paData.sfinfo.frames);
+  printf("\nSample rate: %d", paData.sfinfo.samplerate);
+  printf("\nChannels: %d", paData.sfinfo.channels);
+  printf("\nFrames: %lli", paData.sfinfo.frames);
   
   // Allocate memory for data
   paData.buffer = (float *) malloc(paData.sfinfo.frames * paData.sfinfo.channels * sizeof(float));
   if (!paData.buffer) {
-      printf("Cannot allocate memory\n");
+      printf("\nCannot allocate memory");
       return 1;
   }
 
   // Read the audio data into buffer
   long readcount = sf_read_float(paData.file, paData.buffer, paData.sfinfo.frames * paData.sfinfo.channels);
   
-  printf("readcount: %ld\n", readcount);
+  printf("\nreadcount: %ld", readcount);
 
   // allocate memory to compute fast fourier transform in pa_callback
   paData.fft_buffer = (float*) fftwf_malloc(sizeof(float) * paData.buffer_frames * paData.sfinfo.channels);
