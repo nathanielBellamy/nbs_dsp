@@ -80,8 +80,8 @@ static int callback(const void *inputBuffer, void *outputBuffer,
     for (i = 0; i < framesPerBuffer; i++) {
       for (int ch = 0; ch < paData->sfinfo.channels; ch++) {
         *out++ = paData->fft_buffer[i * paData->sfinfo.channels + ch];
+        paData->index++;
       }
-      paData->index++;
     }
   }
 
