@@ -45,9 +45,25 @@ int main(void) {
   
   printf("readcount: %ld\n", readcount);
 
+  // TODO:
+  //
+  paData.fft_time = (float*) fftw_malloc(sizeof(float) * paData.buffer_frames);
+  paData.fft_freq = (fftwf_complex*) fftw_malloc(sizeof(fftwf_complex) * paData.buffer_frames);
+  paData.fft_plan_to_freq = fftwf_plan_dft_r2c_1d(
+    paData.buffer_frames, 
+    paData.fft_time,
+    paData.fft_freq, 
+    FFTW_ESTIMATE
+  );
+  // paData.fft_plan_to_time = 
+
   if ( pa(&paData) != 0 )
   {
     free(paData.buffer);
+    free(paData.fft_freq);
+    free(paData.fft_time);
+    fftwf_destroy_plan(paData.fft_plan_to_freq);
+    fftwf_destroy_plan(paData.fft_plan_to_time);
     sf_close(paData.file);
     return 1;
   }
@@ -55,6 +71,10 @@ int main(void) {
   // Cleanup
   printf("\nCleaning up resources...");
   free(paData.buffer);
+  free(paData.fft_freq);
+  free(paData.fft_time);
+  fftwf_destroy_plan(paData.fft_plan_to_freq);
+  fftwf_destroy_plan(paData.fft_plan_to_time);
   sf_close(paData.file);
 
   printf("\nDone.");
