@@ -34,7 +34,7 @@ int main(void) {
   PA_DATA paData;
   paData.index = 0;
   paData.buffer_frames = 32;
-  printf("\npadidx: %lli", paData.index);
+  printf("\npa_idx_start: %lli", paData.index);
 
   if (! (paData.file = sf_open("gtfam_mini.wav", SFM_READ, &paData.sfinfo)))
   {

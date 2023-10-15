@@ -35,10 +35,11 @@ static int callback(const void *inputBuffer, void *outputBuffer,
           *out++ = 0;  /* right - silent */
       }
   }
-  else if (paData->index >= paData->sfinfo.frames) 
+  else if (paData->index > paData->sfinfo.frames - 1) 
   {
-    paData->index = 0;
-    return paComplete;
+    // paData->index = 0;
+    // return paComplete;
+    return 1;
   }
   else
   {
@@ -60,10 +61,10 @@ static int callback(const void *inputBuffer, void *outputBuffer,
       fftwf_execute(paData->fft_plan_to_freq);
 
       // mutate paData->fft_freq in place
-      for (i = 0; i < 16; i++) {
-        paData->fft_freq[2*i] = paData->fft_freq[2*i] * 0.2f + paData->fft_freq[2*i + 1] * -0.3f;
-        paData->fft_freq[2*i +1] = paData->fft_freq[2*i] * -0.2f + paData->fft_freq[2*i + 1] * 0.1f;
-      }
+      // for (i = 0; i < 16; i++) {
+      //   paData->fft_freq[2*i] = paData->fft_freq[2*i] * 0.2f + paData->fft_freq[2*i + 1] * -0.3f;
+      //   paData->fft_freq[2*i +1] = paData->fft_freq[2*i] * -0.2f + paData->fft_freq[2*i + 1] * 0.1f;
+      // }
 
       // transform back into time domain
       fftwf_execute(paData->fft_plan_to_time);
@@ -136,24 +137,20 @@ int pa(PA_DATA *paData)
 
   printf("\nHit ENTER to stop program.");
   char c;
-  while( (c = getchar()) != '\n' && c != EOF ) 
-  {
-    if( !Pa_IsStreamActive(stream) )
-    {
-      goto handlePaComplete;
-    }
-  }
-  goto cleanup;
+  while( ( c = getchar() ) != '\n' && c != EOF ) {}
+  goto handlePaComplete;
 
   handlePaComplete:
+    printf("\nhandlePaComplete");
     err = Pa_StopStream( stream );
     if( err != paNoError ) goto error;
     goto cleanup;
 
   cleanup:
+    printf("\npa cleanup");
     err = Pa_CloseStream( stream );
     if( err != paNoError ) goto error;
-    printf("pa_idx_2: %lli \n", paData->index);
+    printf("\npa_idx_end: %lli", paData->index);
 
     Pa_Terminate();
     return 0;
