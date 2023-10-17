@@ -34,7 +34,11 @@ int main(void) {
   bar();
   
   PA_DATA paData;
-  init_pa(&paData);
+  if ( init_pa(&paData) != 0)
+  {
+    freePaData(&paData);
+    return 1;
+  };
 
   if ( pa(&paData) != 0 )
   {
