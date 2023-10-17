@@ -5,7 +5,7 @@ CXX = g++
 # Set flags
 CFLAGS = -Wall -I/usr/local/include
 CXXFLAGS = -Wall
-LDFLAGS = -lstdc++ -lsndfile -lportaudio -lfftw3f -lm -L/usr/local/lib
+LDFLAGS = -lpthread -lstdc++ -lsndfile -lportaudio -lfftw3f -lm -L/usr/local/lib
 
 # Set the names of your source, object, and executable files
 C_SRC = ./src/c/main.c ./src/c/pa.c
