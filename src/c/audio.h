@@ -7,6 +7,6 @@
 
 void freePaData(PA_DATA *paData);
 int init_pa(PA_DATA *paData);
-void *pa(void *paData);
+void *audioMain(void *paData);
 
 #endif

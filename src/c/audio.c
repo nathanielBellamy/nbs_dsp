@@ -6,7 +6,7 @@
 #include <pthread.h>
 #include <complex.h>
 #include <fftw3.h>
-#include "pa.h"
+#include "audio.h"
 #include "pa_data.h"
 
 // following: https://github.com/PortAudio/portaudio/blob/master/examples/pa_fuzz.c
@@ -156,7 +156,7 @@ static int callback(const void *inputBuffer, void *outputBuffer,
   return paContinue;
 }
 
-void *pa(void *paData_)
+void *audioMain(void *paData_)
 {
   PA_DATA *paData = (PA_DATA*)paData_;
   PaStreamParameters inputParameters, outputParameters;

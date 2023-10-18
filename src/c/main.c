@@ -3,7 +3,7 @@
 #include <pthread.h>
 #include <stdlib.h>
 #include <fftw3.h>
-#include "pa.h"
+#include "audio.h"
 #include "pa_data.h"
 #include "visual.h"
 #include "../cpp/foo.h"
@@ -12,9 +12,10 @@
 // pa.h
 int init_pa(PA_DATA *paData);
 void freePaData(PA_DATA *paData);
-void *pa(void *paData);
+void *audioMain(void *paData);
 
 // visual.h
+void *visualMain(void *foo);
 
 // ../cpp/foo.h
 void bar(void);
@@ -36,7 +37,7 @@ int main(void) {
   int ta_create_err = pthread_create(
     &thread_audio, 
     NULL, 
-    pa, // TODO: make pa the right type to pass to pthread
+    audioMain,
     &paData
   );
   if (ta_create_err)

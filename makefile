@@ -8,7 +8,7 @@ CXXFLAGS = -Wall
 LDFLAGS = -lpthread -lstdc++ -lsndfile -lportaudio -lfftw3f -lm -L/usr/local/lib
 
 # Set the names of your source, object, and executable files
-C_SRC = ./src/c/main.c ./src/c/pa.c ./src/c/visual.c
+C_SRC = ./src/c/main.c ./src/c/audio.c ./src/c/visual.c
 CXX_SRC = ./src/cpp/foo.cpp ./src/cpp/Cli.cpp
 HEADER = ./src/cpp/foo.h
 OBJ = $(C_SRC:.c=.o) $(CXX_SRC:.cpp=.o)
