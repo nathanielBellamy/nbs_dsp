@@ -3,6 +3,7 @@
 #include <stdbool.h>
 #include <sndfile.h>
 #include <portaudio.h>
+#include <pthread.h>
 #include <complex.h>
 #include <fftw3.h>
 #include "pa.h"
@@ -205,27 +206,20 @@ void *pa(void *paData_)
   printf("\nHit ENTER to stop program.");
   char c;
   while( ( c = getchar() ) != '\n' && c != EOF ) {}
-  goto handlePaComplete;
+  err = Pa_StopStream( stream );
+  if( err != paNoError ) goto error;
 
-  handlePaComplete:
-    printf("\nhandlePaComplete");
-    err = Pa_StopStream( stream );
-    if( err != paNoError ) goto error;
-    goto cleanup;
-
-  cleanup:
-    printf("\npa cleanup");
-    err = Pa_CloseStream( stream );
-    if( err != paNoError ) goto error;
-    printf("\npa_idx_end: %lli", paData->index);
-
-    Pa_Terminate();
-    return NULL;
+  printf("\npa cleanup");
+  err = Pa_CloseStream( stream );
+  if( err != paNoError ) goto error;
+  printf("\npa_idx_end: %lli", paData->index);
+  Pa_Terminate();
+  pthread_exit((void *) 0);
 
   error:
     Pa_Terminate();
     fprintf( stderr, "\nAn error occurred while using the portaudio stream" );
     fprintf( stderr, "\nError number: %d", err );
     fprintf( stderr, "\nError message: %s", Pa_GetErrorText( err ) );
-    return NULL;
+    pthread_exit((void *) 1);
 }
