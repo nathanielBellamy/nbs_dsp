@@ -5,7 +5,8 @@
 #include <fftw3.h>
 #include "pa_data.h"
 
-void *pa(void *paData);
+void freePaData(PA_DATA *paData);
 int init_pa(PA_DATA *paData);
+void *pa(void *paData);
 
 #endif

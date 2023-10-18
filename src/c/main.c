@@ -8,23 +8,9 @@
 #include "../cpp/foo.h"
 
 // pa.h
-void *pa(void *paData);
 int init_pa(PA_DATA *paData);
-
 void freePaData(PA_DATA *paData);
-void freePaData(PA_DATA *paData) {
-  printf("\nCleaning up resources...");
-  
-  free(paData->buffer);
-  fftwf_free(paData->fft_buffer);
-  fftwf_free(paData->fft_time);
-  fftwf_free(paData->fft_freq);
-  fftwf_destroy_plan(paData->fft_plan_to_freq);
-  fftwf_destroy_plan(paData->fft_plan_to_time);
-  sf_close(paData->file);
-  
-  printf("\nDone.");
-};
+void *pa(void *paData);
 
 // ../cpp/foo.h
 void bar(void);
