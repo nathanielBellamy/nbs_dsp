@@ -141,8 +141,9 @@ static int callback(const void *inputBuffer, void *outputBuffer,
   return paContinue;
 }
 
-int pa(PA_DATA *paData)
+void *pa(void *paData_)
 {
+  PA_DATA *paData = (PA_DATA*)paData_;
   PaStreamParameters inputParameters, outputParameters;
   PaStream *stream;
   PaError err;
@@ -205,12 +206,12 @@ int pa(PA_DATA *paData)
     printf("\npa_idx_end: %lli", paData->index);
 
     Pa_Terminate();
-    return 0;
+    return NULL;
 
   error:
     Pa_Terminate();
     fprintf( stderr, "\nAn error occurred while using the portaudio stream" );
     fprintf( stderr, "\nError number: %d", err );
     fprintf( stderr, "\nError message: %s", Pa_GetErrorText( err ) );
-    return -1;
+    return NULL;
 }
