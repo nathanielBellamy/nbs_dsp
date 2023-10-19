@@ -10,7 +10,7 @@
 #include "visual.h"
 
 // pa.h
-int init_pa(PA_DATA *paData);
+int init_pa(PA_DATA *paData, atomic_int *atomicCounter);
 void freePaData(PA_DATA *paData);
 void *audioMain(void *paData);
 
@@ -25,8 +25,9 @@ int main(void) {
   bar();
   
   // init data
+  atomic_int atomicCounter = ATOMIC_VAR_INIT(0);
   PA_DATA paData;
-  if ( init_pa(&paData) != 0)
+  if ( init_pa(&paData, &atomicCounter) != 0)
   {
     freePaData(&paData);
     return 1;

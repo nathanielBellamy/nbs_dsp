@@ -1,6 +1,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <stdbool.h>
+#include <stdatomic.h>
 #include <sndfile.h>
 #include <portaudio.h>
 #include <pthread.h>
@@ -29,8 +30,9 @@ void freePaData(PA_DATA *paData) {
   printf("\nDone.");
 };
 
-int init_pa(PA_DATA *paData)
+int init_pa(PA_DATA *paData, atomic_int *atomicCounter)
 {
+  paData->atomicCounter = atomicCounter;
   paData->index = 0;
   paData->buffer_frames = 32;
   printf("\npa_idx_start: %lli", paData->index);

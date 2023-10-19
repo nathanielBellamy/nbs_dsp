@@ -1,12 +1,14 @@
 #ifndef PA_DATA_H
 #define PA_DATA_H
+#include <stdatomic.h>
 #include <sndfile.h>
 #include <fftw3.h>
 
-// TODO: 
-//  fftw_plan fftwPlan
-//  float *fftwOutBuffer
 typedef struct {
+    // to be accessed by visual thread
+    atomic_int *atomicCounter;
+
+    // for portaudio only
     SNDFILE *file;
     SF_INFO sfinfo;
     float *buffer;
@@ -37,5 +39,7 @@ typedef struct {
   //              paData.fft_buffer --copy-->
   //                pa_out                
 } PA_DATA;
+
+// TODO: rename to audio_data
 
 #endif
