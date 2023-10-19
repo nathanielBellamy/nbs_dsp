@@ -8,6 +8,7 @@
 #include "visual.h"
 #include "../cpp/foo.h"
 #include "visual.h"
+#include "visual_data.h"
 
 // pa.h
 int init_pa(PA_DATA *paData, atomic_int *atomicCounter);
@@ -47,11 +48,13 @@ int main(void) {
     return 1;
   }
 
+  VISUAL_DATA visualData;
+  visualData.atomicCounter = &atomicCounter;
   int tv_create_err = pthread_create(
     &thread_visual,
     NULL,
     visualMain,
-    NULL
+    &visualData
   );
   if (tv_create_err)
   {
@@ -59,17 +62,20 @@ int main(void) {
     return 1;
   }
 
-  // join threads
+  // cleanup threads
+  //
+  // wait for audio thread to finish
   int ta_join_err = pthread_join(thread_audio, NULL);
   if ( ta_join_err )
   {
     fprintf(stderr, "\nError - audio pthread_join() return code: %d", ta_join_err);
   }
 
-  int tv_join_err = pthread_join(thread_visual, NULL);
-  if ( tv_join_err )
+  // cancel visual thread
+  int tv_cancel_err = pthread_cancel(thread_visual);
+  if ( tv_cancel_err )
   {
-    fprintf(stderr, "\nError - visual pthread_join() return code: %d", tv_join_err);
+    fprintf(stderr, "\nError - visual pthread_join() return code: %d", tv_cancel_err);
   }
 
   // Cleanup

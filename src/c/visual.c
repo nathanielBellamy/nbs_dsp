@@ -1,18 +1,19 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <stdbool.h>
+#include <stdatomic.h>
 #include <pthread.h>
 #include <unistd.h>
 #include "visual.h"
+#include "visual_data.h"
 
-void *visualMain(void *foo) 
+void *visualMain(void *visualData_) 
 {
-  printf("\nVisual Thread Started");
-  sleep(5);
-  printf("\nVisual Thread slept a bit.");
-  sleep(10);
-  printf("\nVisual Thread slept a bit more.");
-  sleep(1);
+  VISUAL_DATA *visualData = (VISUAL_DATA *) visualData_;
+  while( true )
+  {
+    printf("\n%d", atomic_load(visualData->atomicCounter));
+  }
   printf("\nVisual Thread Signing Off");
   pthread_exit((void *) 0);
 }

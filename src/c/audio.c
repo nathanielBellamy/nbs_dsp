@@ -95,6 +95,7 @@ static int callback(const void *inputBuffer, void *outputBuffer,
   (void) statusFlags;
   PA_DATA *paData = (PA_DATA *) userData;
   // PA_DATA paData_initial = *paData;
+  atomic_fetch_add(paData->atomicCounter, 1);
 
   if( paData->buffer == NULL )
   {
@@ -165,6 +166,7 @@ void *audioMain(void *paData_)
   PaStream *stream;
   PaError err;
   
+  printf("\natomicCounter: %i", *paData->atomicCounter);
   printf("\npa_samplerate: %i", paData->sfinfo.samplerate);
   printf("\npa_buff_frames: %lli", paData->buffer_frames);
   printf("\npa_format: %i", paData->sfinfo.format);

@@ -2,6 +2,6 @@
 #define VISUAL_H
 #include <stdio.h>
 
-void *visualMain(void *foo);
+void *visualMain(void *visualData);
 
 #endif
