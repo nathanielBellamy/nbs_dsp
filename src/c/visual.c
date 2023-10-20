@@ -19,7 +19,8 @@ void *visualMain(void *visualData_)
     if (frameCounter == frameRate - 1)
     {
       system("clear");
-    } else if (frameCounter == frameRate) {
+    } 
+    else if (frameCounter == frameRate) {
       printf("\n\n\n\n\n\n\n\n%d", val);
       frameCounter = 0;
     }
