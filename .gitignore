@@ -8,6 +8,7 @@ bin/**/*
 **/.DS_STORE
 
 // misc
-compile_flags.txt // clangd helper - LSP integration
 gtfam.wav
+gtfam_mini.wav
+gtfam_mini.wav.reapeaks
 

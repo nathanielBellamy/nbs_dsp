@@ -1,2 +1,4 @@
+// this file tells clangd where to source
+
 -I/usr/local/include
 -L/usr/local/lib
