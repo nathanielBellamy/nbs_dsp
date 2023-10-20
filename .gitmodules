@@ -1,0 +1,3 @@
+[submodule "src/cpp/PolynomialConsoleGraph"]
+	path = src/cpp/PolynomialConsoleGraph
+	url = https://github.com/nathanielBellamy/PolynomialConsoleGraph.git
