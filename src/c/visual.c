@@ -6,6 +6,10 @@
 #include <unistd.h>
 #include "visual.h"
 #include "visual_data.h"
+#include "../cpp/extern_c.h"
+
+// extern_c.h
+void drawGraph(int counter);
 
 void *visualMain(void *visualData_) 
 {
@@ -21,7 +25,8 @@ void *visualMain(void *visualData_)
       system("clear");
     } 
     else if (frameCounter == frameRate) {
-      printf("\n\n\n\n\n\n\n\n%d", val);
+      printf("\n%d\n", val);
+      drawGraph(val);
       frameCounter = 0;
     }
   }
