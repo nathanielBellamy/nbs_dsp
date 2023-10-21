@@ -6,7 +6,7 @@
 #include "audio.h"
 #include "pa_data.h"
 #include "visual.h"
-#include "../cpp/foo.h"
+#include "../cpp/extern_c.h"
 #include "visual.h"
 #include "visual_data.h"
 
@@ -18,7 +18,7 @@ void *audioMain(void *paData);
 // visual.h
 void *visualMain(void *foo);
 
-// ../cpp/foo.h
+// ../cpp/extern_c.h
 void bar(void);
 
 int main(void);

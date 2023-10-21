@@ -1,6 +1,6 @@
 #include<iostream>
 #include<string>
-#include "foo.h"
+#include "extern_c.h"
 #include "Cli.h"
 
 using namespace std;
