@@ -8,7 +8,7 @@
 #include <complex.h>
 #include <fftw3.h>
 #include "audio.h"
-#include "pa_data.h"
+#include "audio_data.h"
 
 // following: https://github.com/PortAudio/portaudio/blob/master/examples/pa_fuzz.c
 
@@ -16,28 +16,28 @@
 
 typedef float SAMPLE;
 
-void freePaData(PA_DATA *paData) {
+void freeAudioData(AUDIO_DATA *audioData) {
   printf("\nCleaning up resources...");
   
-  free(paData->buffer);
-  fftwf_free(paData->fft_buffer);
-  fftwf_free(paData->fft_time);
-  fftwf_free(paData->fft_freq);
-  fftwf_destroy_plan(paData->fft_plan_to_freq);
-  fftwf_destroy_plan(paData->fft_plan_to_time);
-  sf_close(paData->file);
+  free(audioData->buffer);
+  fftwf_free(audioData->fft_buffer);
+  fftwf_free(audioData->fft_time);
+  fftwf_free(audioData->fft_freq);
+  fftwf_destroy_plan(audioData->fft_plan_to_freq);
+  fftwf_destroy_plan(audioData->fft_plan_to_time);
+  sf_close(audioData->file);
   
   printf("\nDone.");
 };
 
-int init_pa(PA_DATA *paData, atomic_int *atomicCounter)
+int init_pa(AUDIO_DATA *audioData, atomic_int *atomicCounter)
 {
-  paData->atomicCounter = atomicCounter;
-  paData->index = 0;
-  paData->buffer_frames = 32;
-  printf("\npa_idx_start: %lli", paData->index);
+  audioData->atomicCounter = atomicCounter;
+  audioData->index = 0;
+  audioData->buffer_frames = 32;
+  printf("\npa_idx_start: %lli", audioData->index);
 
-  if (! (paData->file = sf_open("gtfam_mini.wav", SFM_READ, &paData->sfinfo)))
+  if (! (audioData->file = sf_open("gtfam_mini.wav", SFM_READ, &audioData->sfinfo)))
   {
 		printf ("Not able to open input file.\n") ;
 		/* Print the error message from libsndfile. */
@@ -46,36 +46,36 @@ int init_pa(PA_DATA *paData, atomic_int *atomicCounter)
   };
   
   // Display some information about the file.
-  printf("\nSample rate: %d", paData->sfinfo.samplerate);
-  printf("\nChannels: %d", paData->sfinfo.channels);
-  printf("\nFrames: %lli", paData->sfinfo.frames);
+  printf("\nSample rate: %d", audioData->sfinfo.samplerate);
+  printf("\nChannels: %d", audioData->sfinfo.channels);
+  printf("\nFrames: %lli", audioData->sfinfo.frames);
   
   // Allocate memory for data
-  paData->buffer = (float *) malloc(paData->sfinfo.frames * paData->sfinfo.channels * sizeof(float));
-  if (!paData->buffer) {
+  audioData->buffer = (float *) malloc(audioData->sfinfo.frames * audioData->sfinfo.channels * sizeof(float));
+  if (!audioData->buffer) {
       printf("\nCannot allocate memory");
       return 1;
   }
 
   // Read the audio data into buffer
-  long readcount = sf_read_float(paData->file, paData->buffer, paData->sfinfo.frames * paData->sfinfo.channels);
+  long readcount = sf_read_float(audioData->file, audioData->buffer, audioData->sfinfo.frames * audioData->sfinfo.channels);
   
   printf("\nreadcount: %ld", readcount);
 
   // allocate memory to compute fast fourier transform in pa_callback
-  paData->fft_buffer = (float*) fftwf_malloc(sizeof(float) * paData->buffer_frames * paData->sfinfo.channels);
-  paData->fft_time = (float*) fftwf_malloc(sizeof(float) * paData->buffer_frames);
-  paData->fft_freq = (fftwf_complex*) fftwf_malloc(sizeof(fftwf_complex) * paData->buffer_frames);
-  paData->fft_plan_to_freq = fftwf_plan_dft_r2c_1d(
-    paData->buffer_frames, 
-    paData->fft_time,
-    paData->fft_freq, 
+  audioData->fft_buffer = (float*) fftwf_malloc(sizeof(float) * audioData->buffer_frames * audioData->sfinfo.channels);
+  audioData->fft_time = (float*) fftwf_malloc(sizeof(float) * audioData->buffer_frames);
+  audioData->fft_freq = (fftwf_complex*) fftwf_malloc(sizeof(fftwf_complex) * audioData->buffer_frames);
+  audioData->fft_plan_to_freq = fftwf_plan_dft_r2c_1d(
+    audioData->buffer_frames, 
+    audioData->fft_time,
+    audioData->fft_freq, 
     FFTW_ESTIMATE
   );
-  paData->fft_plan_to_time = fftwf_plan_dft_c2r_1d(
-    paData->buffer_frames, 
-    paData->fft_freq, 
-    paData->fft_time,
+  audioData->fft_plan_to_time = fftwf_plan_dft_c2r_1d(
+    audioData->buffer_frames, 
+    audioData->fft_freq, 
+    audioData->fft_time,
     FFTW_ESTIMATE
   );
   
@@ -93,11 +93,11 @@ static int callback(const void *inputBuffer, void *outputBuffer,
   (void) inputBuffer;
   (void) timeInfo; /* Prevent unused variable warnings. */
   (void) statusFlags;
-  PA_DATA *paData = (PA_DATA *) userData;
-  // PA_DATA paData_initial = *paData;
-  atomic_fetch_add(paData->atomicCounter, 1);
+  AUDIO_DATA *audioData = (AUDIO_DATA *) userData;
+  // AUDIO_DATA audioData_initial = *audioData;
+  atomic_fetch_add(audioData->atomicCounter, 1);
 
-  if( paData->buffer == NULL )
+  if( audioData->buffer == NULL )
   {
       for( i=0; i<framesPerBuffer; i++ )
       {
@@ -105,9 +105,9 @@ static int callback(const void *inputBuffer, void *outputBuffer,
           *out++ = 0;  /* right - silent */
       }
   }
-  else if (paData->index > paData->sfinfo.frames - 1) 
+  else if (audioData->index > audioData->sfinfo.frames - 1) 
   {
-    // paData->index = 0;
+    // audioData->index = 0;
     // return paComplete;
     return 1;
   }
@@ -115,61 +115,61 @@ static int callback(const void *inputBuffer, void *outputBuffer,
   {
     // process
     //
-    // paData->buffer --copy--> paData->fft_buffer
-    for (i = 0; i < framesPerBuffer * paData->sfinfo.channels; i++) {
-      paData->fft_buffer[i] = paData->buffer[paData->index + i];
+    // audioData->buffer --copy--> audioData->fft_buffer
+    for (i = 0; i < framesPerBuffer * audioData->sfinfo.channels; i++) {
+      audioData->fft_buffer[i] = audioData->buffer[audioData->index + i];
     }
 
     // render fft for each channel
-    for (int ch = 0; ch < paData->sfinfo.channels; ch++) {
-      // copy channel into paData->fft_time
+    for (int ch = 0; ch < audioData->sfinfo.channels; ch++) {
+      // copy channel into audioData->fft_time
       for (i = 0; i < framesPerBuffer; i++) {
-        paData->fft_time[i] = paData->fft_buffer[i * paData->sfinfo.channels + ch];
+        audioData->fft_time[i] = audioData->fft_buffer[i * audioData->sfinfo.channels + ch];
       }
 
       // compute fft
-      fftwf_execute(paData->fft_plan_to_freq);
+      fftwf_execute(audioData->fft_plan_to_freq);
 
-      // mutate paData->fft_freq in place
+      // mutate audioData->fft_freq in place
       // for (i = 0; i < 16; i++) {
-      //   paData->fft_freq[2*i] = paData->fft_freq[2*i] * 0.2f + paData->fft_freq[2*i + 1] * -0.3f;
-      //   paData->fft_freq[2*i +1] = paData->fft_freq[2*i] * -0.2f + paData->fft_freq[2*i + 1] * 0.1f;
+      //   audioData->fft_freq[2*i] = audioData->fft_freq[2*i] * 0.2f + audioData->fft_freq[2*i + 1] * -0.3f;
+      //   audioData->fft_freq[2*i +1] = audioData->fft_freq[2*i] * -0.2f + audioData->fft_freq[2*i + 1] * 0.1f;
       // }
 
       // transform back into time domain
-      fftwf_execute(paData->fft_plan_to_time);
+      fftwf_execute(audioData->fft_plan_to_time);
 
       // normalize fft_time 
-      // write out to paData->fft_buffer
+      // write out to audioData->fft_buffer
       for (i = 0; i < framesPerBuffer; i++) {
-        paData->fft_buffer[i * paData->sfinfo.channels + ch] = paData->fft_time[i] / 32.0f;
+        audioData->fft_buffer[i * audioData->sfinfo.channels + ch] = audioData->fft_time[i] / 32.0f;
       }
     }
     
-    // paData->fft_buffer --copy--> paOut
+    // audioData->fft_buffer --copy--> paOut
     for (i = 0; i < framesPerBuffer; i++) {
-      for (int ch = 0; ch < paData->sfinfo.channels; ch++) {
-        *out++ = paData->fft_buffer[i * paData->sfinfo.channels + ch];
-        paData->index++;
+      for (int ch = 0; ch < audioData->sfinfo.channels; ch++) {
+        *out++ = audioData->fft_buffer[i * audioData->sfinfo.channels + ch];
+        audioData->index++;
       }
     }
   }
 
-  // printf("idx: %lli \n", paData->index);
+  // printf("idx: %lli \n", audioData->index);
   return paContinue;
 }
 
-void *audioMain(void *paData_)
+void *audioMain(void *audioData_)
 {
-  PA_DATA *paData = (PA_DATA*)paData_;
+  AUDIO_DATA *audioData = (AUDIO_DATA*)audioData_;
   PaStreamParameters inputParameters, outputParameters;
   PaStream *stream;
   PaError err;
   
-  printf("\natomicCounter: %i", *paData->atomicCounter);
-  printf("\npa_samplerate: %i", paData->sfinfo.samplerate);
-  printf("\npa_buff_frames: %lli", paData->buffer_frames);
-  printf("\npa_format: %i", paData->sfinfo.format);
+  printf("\natomicCounter: %i", *audioData->atomicCounter);
+  printf("\npa_samplerate: %i", audioData->sfinfo.samplerate);
+  printf("\npa_buff_frames: %lli", audioData->buffer_frames);
+  printf("\npa_format: %i", audioData->sfinfo.format);
 
   err = Pa_Initialize();
   if( err != paNoError ) goto error;
@@ -197,11 +197,11 @@ void *audioMain(void *paData_)
             &stream,
             &inputParameters,
             &outputParameters,
-            paData->sfinfo.samplerate,
-            paData->buffer_frames,
+            audioData->sfinfo.samplerate,
+            audioData->buffer_frames,
             paNoFlag, /* paClipOn, */   
             callback,
-            paData );
+            audioData );
   if( err != paNoError ) goto error;
 
   err = Pa_StartStream( stream );
@@ -216,7 +216,7 @@ void *audioMain(void *paData_)
   printf("\npa cleanup");
   err = Pa_CloseStream( stream );
   if( err != paNoError ) goto error;
-  printf("\npa_idx_end: %lli", paData->index);
+  printf("\npa_idx_end: %lli", audioData->index);
   Pa_Terminate();
   pthread_exit((void *) 0);
 

@@ -4,16 +4,16 @@
 #include <stdlib.h>
 #include <fftw3.h>
 #include "audio.h"
-#include "pa_data.h"
+#include "audio_data.h"
 #include "visual.h"
 #include "../cpp/extern_c.h"
 #include "visual.h"
 #include "visual_data.h"
 
 // pa.h
-int init_pa(PA_DATA *paData, atomic_int *atomicCounter);
-void freePaData(PA_DATA *paData);
-void *audioMain(void *paData);
+int init_pa(AUDIO_DATA *audioData, atomic_int *atomicCounter);
+void freeAudioData(AUDIO_DATA *audioData);
+void *audioMain(void *audioData);
 
 // visual.h
 void *visualMain(void *foo);
@@ -27,10 +27,10 @@ int main(void) {
   
   // init data
   atomic_int atomicCounter = ATOMIC_VAR_INIT(0);
-  PA_DATA paData;
-  if ( init_pa(&paData, &atomicCounter) != 0)
+  AUDIO_DATA audioData;
+  if ( init_pa(&audioData, &atomicCounter) != 0)
   {
-    freePaData(&paData);
+    freeAudioData(&audioData);
     return 1;
   };
 
@@ -40,7 +40,7 @@ int main(void) {
     &thread_audio, 
     NULL, 
     audioMain,
-    &paData
+    &audioData
   );
   if (ta_create_err)
   {
@@ -79,6 +79,6 @@ int main(void) {
   }
 
   // Cleanup
-  freePaData(&paData);
+  freeAudioData(&audioData);
   return 0;
 }

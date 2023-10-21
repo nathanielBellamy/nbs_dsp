@@ -1,5 +1,5 @@
-#ifndef PA_DATA_H
-#define PA_DATA_H
+#ifndef AUDIO_DATA_H
+#define AUDIO_DATA_H
 #include <stdatomic.h>
 #include <sndfile.h>
 #include <fftw3.h>
@@ -38,8 +38,6 @@ typedef struct {
   //             paData.fft_time --copy into indices mod channel count (interwoven)--> 
   //              paData.fft_buffer --copy-->
   //                pa_out                
-} PA_DATA;
-
-// TODO: rename to audio_data
+} AUDIO_DATA;
 
 #endif

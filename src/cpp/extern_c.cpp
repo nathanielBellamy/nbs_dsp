@@ -17,9 +17,7 @@ void drawGraph(int counter)
 {
   Draw draw;
   Settings settings;
-  // TODO:
-  // settings = Settings::default(); 
-  //
+
   vector<double> zeroPolynomialOfMaxDegree(4, 0);
   vector<vector<double> > polynomialArray(1, zeroPolynomialOfMaxDegree);
 
@@ -57,8 +55,5 @@ void drawGraph(int counter)
     polynomialArray.at(0).at(2) = -1;
     polynomialArray.at(0).at(3) = 2;
   }
-  // TODO:
-  // pass in atomic Counter
-  // polynomialArray = constructPolynomialArray(counter)
   draw.render(polynomialArray, settings);
 };
