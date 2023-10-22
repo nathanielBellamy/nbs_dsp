@@ -30,7 +30,7 @@ void drawGraph(int counter)
   if ( counterMod < 250 )
   {
     polynomialArray.at(0).at(0) = -0.75;
-    polynomialArray.at(0).at(1) = 0.5;
+    polynomialArray.at(0).at(1) = 0.5 - skew / 2.0;
     polynomialArray.at(0).at(2) = -1;
     polynomialArray.at(0).at(3) = 2 + skew;
   }
@@ -38,7 +38,7 @@ void drawGraph(int counter)
   if ( counterMod > 250 && counterMod <= 500)
   {
     polynomialArray.at(0).at(0) = -0.25;
-    polynomialArray.at(0).at(1) = 0.5;
+    polynomialArray.at(0).at(1) = 0.5 - skew / 2.0;
     polynomialArray.at(0).at(2) = -1;
     polynomialArray.at(0).at(3) = 2 + skew;
   }
@@ -46,7 +46,7 @@ void drawGraph(int counter)
   if ( counterMod > 500 && counterMod <= 750)
   {
     polynomialArray.at(0).at(0) = 0.25;
-    polynomialArray.at(0).at(1) = 0.5;
+    polynomialArray.at(0).at(1) = 0.5 - skew / 2.0;
     polynomialArray.at(0).at(2) = -1;
     polynomialArray.at(0).at(3) = 2 + skew;
   }
@@ -54,7 +54,7 @@ void drawGraph(int counter)
   if ( counterMod > 750 && counterMod <= 1000)
   {
     polynomialArray.at(0).at(0) = 0.75;
-    polynomialArray.at(0).at(1) = 0.5;
+    polynomialArray.at(0).at(1) = 0.5 - skew / 2.0;
     polynomialArray.at(0).at(2) = -1;
     polynomialArray.at(0).at(3) = 2 + skew;
   }

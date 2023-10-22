@@ -13,7 +13,7 @@ void drawGraph(int counter);
 
 void *visualMain(void *visualData_) 
 {
-  int frameRate = 120;
+  int frameRate = 15000000;
   int frameCounter = 0;
   VISUAL_DATA *visualData = (VISUAL_DATA *) visualData_;
   while( true )
