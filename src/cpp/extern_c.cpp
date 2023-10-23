@@ -19,7 +19,7 @@ void drawGraph(int counter)
   Settings settings;
 
   vector<double> zeroPolynomialOfMaxDegree(1, 0);
-  vector<vector<double> > polynomialArray(16, zeroPolynomialOfMaxDegree);
+  vector<vector<double> > polynomialArray(32, zeroPolynomialOfMaxDegree);
 
   int counterMod;
   counterMod = counter % 1000;
@@ -45,6 +45,22 @@ void drawGraph(int counter)
     polynomialArray.at(13).at(0) = 0.5 + skew;
     polynomialArray.at(14).at(0) = -1 + skew;
     polynomialArray.at(15).at(0) = 1 + skew;
+    polynomialArray.at(16).at(0) = -0.75 + skew;
+    polynomialArray.at(17).at(0) = 0.5 + skew;
+    polynomialArray.at(18).at(0) = -1 + skew;
+    polynomialArray.at(19).at(0) = 1 + skew;
+    polynomialArray.at(20).at(0) = -0.75 + skew;
+    polynomialArray.at(21).at(0) = 0.5 + skew;
+    polynomialArray.at(22).at(0) = -1 + skew;
+    polynomialArray.at(23).at(0) = 1 + skew;
+    polynomialArray.at(24).at(0) = -0.75 + skew;
+    polynomialArray.at(25).at(0) = 0.5 + skew;
+    polynomialArray.at(26).at(0) = -1 + skew;
+    polynomialArray.at(27).at(0) = 1 + skew;
+    polynomialArray.at(28).at(0) = -0.75 + skew;
+    polynomialArray.at(29).at(0) = 0.5 + skew;
+    polynomialArray.at(30).at(0) = -1 + skew;
+    polynomialArray.at(31).at(0) = 1 + skew;
   // }
 
   // if ( counterMod > 250 && counterMod <= 500)
