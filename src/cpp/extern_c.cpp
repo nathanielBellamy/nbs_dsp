@@ -58,5 +58,5 @@ void drawGraph(int counter)
     polynomialArray.at(0).at(2) = -1;
     polynomialArray.at(0).at(3) = 2 + skew;
   }
-  draw.render(polynomialArray, settings);
+  draw.renderPiecewise(polynomialArray, settings);
 };
