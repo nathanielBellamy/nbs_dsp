@@ -33,6 +33,24 @@ int main(void) {
     freeAudioData(&audioData);
     return 1;
   };
+  // NOTE:
+  // - atomicEQ consists of N=audioData.buffer_frames atomic_ints in contiguous memeory
+  // - we do not assume synchronization to be maintained across atomic values (aka. this is not an atomic_array)
+  atomic_int* atomicEQ;
+  // NOTE:
+  // - This assumes stereo - aka two channels
+  // - We process N=audioData.buffer_frames samples per pa_callback
+  // - that gives us N/2 bands of EQ per channel
+  // - given that we have two channels, we have N EQ values to share between threads
+  atomicEQ = (atomic_int *) malloc(audioData.buffer_frames * sizeof(atomic_int));
+  for (int i = 0; i < audioData.buffer_frames; i++)
+  {
+    atomicEQ[i] = ATOMIC_VAR_INIT(0);
+  }
+
+  // TODO:
+  // audioData.atomicEQ = &atomicEQ;
+  // visualData.atomicEQ = &atomicEQl
 
   // init threads
   pthread_t thread_audio, thread_visual;

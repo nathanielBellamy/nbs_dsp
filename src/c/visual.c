@@ -23,7 +23,8 @@ void *visualMain(void *visualData_)
     {
       system("clear");
     } 
-    else if (frameCounter == frameRate) {
+    else if (frameCounter == frameRate) 
+    {
       int val = atomic_load(visualData->atomicCounter);
       printf("\n%d\n", val);
       drawGraph(val);
