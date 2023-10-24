@@ -19,12 +19,12 @@ void *visualMain(void *visualData_)
   while( true )
   {
     frameCounter += 1;
-    int val = atomic_load(visualData->atomicCounter);
     if (frameCounter == frameRate - 1)
     {
       system("clear");
     } 
     else if (frameCounter == frameRate) {
+      int val = atomic_load(visualData->atomicCounter);
       printf("\n%d\n", val);
       drawGraph(val);
       frameCounter = 0;
