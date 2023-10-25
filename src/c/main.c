@@ -102,5 +102,6 @@ int main(void) {
 
   // Cleanup
   freeAudioData(&audioData);
+  free(atomicEQ);
   return 0;
 }
