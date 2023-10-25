@@ -47,6 +47,7 @@ int main(void) {
   {
     atomicEQ[i] = ATOMIC_VAR_INIT(0);
   }
+  audioData.atomicEQ = atomicEQ;
 
   // TODO:
   // audioData.atomicEQ = &atomicEQ;
@@ -68,6 +69,9 @@ int main(void) {
 
   VISUAL_DATA visualData;
   visualData.atomicCounter = &atomicCounter;
+  visualData.atomicEQ = atomicEQ;
+  visualData.buffer_frames = audioData.buffer_frames;
+
   int tv_create_err = pthread_create(
     &thread_visual,
     NULL,

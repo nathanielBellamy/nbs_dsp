@@ -3,8 +3,9 @@
 #include <stdatomic.h>
 
 typedef struct {
-    // to be accessed by visual thread
     atomic_int *atomicCounter;
+    atomic_int *atomicEQ;
+    int buffer_frames;
 } VISUAL_DATA;
 
 #endif

@@ -15,7 +15,11 @@ void *visualMain(void *visualData_)
 {
   int frameRate = 15000000;
   int frameCounter = 0;
+  int *bufferAtomicEQ;
+
   VISUAL_DATA *visualData = (VISUAL_DATA *) visualData_;
+  bufferAtomicEQ = (int *) malloc(visualData->buffer_frames * sizeof(int));
+
   while( true )
   {
     frameCounter += 1;
@@ -27,6 +31,18 @@ void *visualMain(void *visualData_)
     {
       int val = atomic_load(visualData->atomicCounter);
       printf("\n%d\n", val);
+
+      for (int i = 0; i < visualData->buffer_frames; i++)
+      {
+        bufferAtomicEQ[i] = atomic_load(visualData->atomicEQ + i); // load ith atomic EQ
+      }
+
+
+      // TODO:
+        //  drawGraph(val, &atomicEQ)
+        //  
+        //  - atomicEQ[0-31] is 32 band EQ for left
+        //  - atomicEQ[32-63] is 32 band EQ for right
       drawGraph(val);
       frameCounter = 0;
     }
