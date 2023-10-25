@@ -130,11 +130,10 @@ static int callback(const void *inputBuffer, void *outputBuffer,
       // compute fft
       fftwf_execute(audioData->fft_plan_to_freq);
 
-      // mutate audioData->fft_freq in place
-      // for (i = 0; i < 16; i++) {
-      //   audioData->fft_freq[2*i] = audioData->fft_freq[2*i] * 0.2f + audioData->fft_freq[2*i + 1] * -0.3f;
-      //   audioData->fft_freq[2*i +1] = audioData->fft_freq[2*i] * -0.2f + audioData->fft_freq[2*i + 1] * 0.1f;
-      // }
+      // TODO:
+      //  - compute frequencies
+      //  - write to atomicEQ
+
 
       // transform back into time domain
       fftwf_execute(audioData->fft_plan_to_time);
