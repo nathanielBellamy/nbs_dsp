@@ -15,6 +15,8 @@ typedef struct {
     float *buffer;
     sf_count_t index;
     sf_count_t buffer_frames; // frames processed per callback invocation
+    sf_count_t buffer_frames_d2p1; // buffer_frames over 2, plus 1
+                                   // this is the number of non-redundant complex numbers in fft_freq 
   //
   //
   // NOTE: 

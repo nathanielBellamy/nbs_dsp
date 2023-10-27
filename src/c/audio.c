@@ -2,6 +2,7 @@
 #include <stdlib.h>
 #include <stdbool.h>
 #include <stdatomic.h>
+#include <math.h>
 #include <sndfile.h>
 #include <portaudio.h>
 #include <pthread.h>
@@ -35,6 +36,7 @@ int init_pa(AUDIO_DATA *audioData, atomic_int *atomicCounter)
   audioData->atomicCounter = atomicCounter;
   audioData->index = 0;
   audioData->buffer_frames = 32;
+  audioData->buffer_frames_d2p1 = 17;
   printf("\npa_idx_start: %lli", audioData->index);
 
   if (! (audioData->file = sf_open("gtfam_mini.wav", SFM_READ, &audioData->sfinfo)))
@@ -80,6 +82,10 @@ int init_pa(AUDIO_DATA *audioData, atomic_int *atomicCounter)
   );
   
   return 0;
+}
+
+int magnitude(fftwf_complex* z) {
+    return floor(1000000 * sqrt(z[0]*z[0] + z[1]*z[1]));
 }
 
 static int callback(const void *inputBuffer, void *outputBuffer,
@@ -129,10 +135,18 @@ static int callback(const void *inputBuffer, void *outputBuffer,
 
       // compute fft
       fftwf_execute(audioData->fft_plan_to_freq);
-
+      
       // TODO:
-      //  - compute frequencies
-      //  - write to atomicEQ
+      //  - we only need the first audioData->buffer_frames/2
+      //  - but we shouldn't compute that number here
+      for (i = 0; i < audioData->buffer_frames_d2p1; i++)
+      {
+        fftwf_complex z = audioData->fft_freq[i];
+        atomic_store(
+          audioData->atomicEQ + i + ( ch * audioData->buffer_frames_d2p1 ), 
+          magnitude(&z)
+        );
+      }
 
 
       // transform back into time domain

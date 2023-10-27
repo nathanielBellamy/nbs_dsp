@@ -32,10 +32,21 @@ void *visualMain(void *visualData_)
       int val = atomic_load(visualData->atomicCounter);
       printf("\n%d\n", val);
 
-      for (int i = 0; i < visualData->buffer_frames; i++)
+      for (int ch = 0; ch < 2; ch++)
       {
-        bufferAtomicEQ[i] = atomic_load(visualData->atomicEQ + i); // load ith atomic EQ
+        printf("\n Channel \n");
+        for (int i = 0; i < visualData->buffer_frames_d2p1; i++)
+        {
+          int index = i + (ch * visualData->buffer_frames_d2p1);
+          bufferAtomicEQ[index] = atomic_load(visualData->atomicEQ + index); // load ith atomic EQ
+          if (i < 3)
+          {
+            printf(" ==>> %i, %i <<==\n", i, bufferAtomicEQ[i]);
+          }
+        }
+        printf("\n");
       }
+
 
 
       // TODO:
@@ -43,10 +54,13 @@ void *visualMain(void *visualData_)
         //  
         //  - atomicEQ[0-31] is 32 band EQ for left
         //  - atomicEQ[32-63] is 32 band EQ for right
+
       drawGraph(val);
       frameCounter = 0;
     }
   }
+
+  free(bufferAtomicEQ);
   printf("\nVisual Thread Signing Off");
   pthread_exit((void *) 0);
 }

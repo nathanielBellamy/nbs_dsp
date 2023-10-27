@@ -42,7 +42,7 @@ int main(void) {
   // - We process N=audioData.buffer_frames samples per pa_callback
   // - that gives us N/2 bands of EQ per channel
   // - given that we have two channels, we have N EQ values to share between threads
-  atomicEQ = (atomic_int *) malloc(audioData.buffer_frames * sizeof(atomic_int));
+  atomicEQ = (atomic_int *) malloc(2 * audioData.buffer_frames_d2p1 * sizeof(atomic_int));
   for (int i = 0; i < audioData.buffer_frames; i++)
   {
     atomicEQ[i] = ATOMIC_VAR_INIT(0);
@@ -71,6 +71,7 @@ int main(void) {
   visualData.atomicCounter = &atomicCounter;
   visualData.atomicEQ = atomicEQ;
   visualData.buffer_frames = audioData.buffer_frames;
+  visualData.buffer_frames_d2p1 = audioData.buffer_frames_d2p1;
 
   int tv_create_err = pthread_create(
     &thread_visual,
