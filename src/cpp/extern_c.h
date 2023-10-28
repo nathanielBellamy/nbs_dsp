@@ -6,7 +6,7 @@ extern "C" {
 #endif
 
 void bar();
-void drawGraph(int counter);
+void drawGraph(float* counter);
 
 #ifdef __cplusplus
 }

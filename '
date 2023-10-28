@@ -10,7 +10,7 @@
 #include "../cpp/extern_c.h"
 
 // extern_c.h
-void drawGraph(float* counter);
+void drawGraph(int counter);
 
 void *visualMain(void *visualData_) 
 {
@@ -18,23 +18,21 @@ void *visualMain(void *visualData_)
   int frameRate = 15000000;
   int frameCounter = 0;
   int *bufferAtomicEQ;
-  float *bufferAtomicEQ_norm;
 
   VISUAL_DATA *visualData = (VISUAL_DATA *) visualData_;
   bufferAtomicEQ = (int *) malloc(2 * visualData->buffer_frames_d2p1 * sizeof(int));
-  bufferAtomicEQ_norm = (float *) malloc(2 * visualData->buffer_frames_d2p1 * sizeof(float));
 
   while( true )
   {
     frameCounter += 1;
-    if (frameCounter == frameRate - 5000)
+    if (frameCounter == frameRate - 1)
     {
       system("clear");
     } 
     else if (frameCounter == frameRate) 
     {
-      // int val = atomic_load(visualData->atomicCounter);
-      // printf("\n%d\n", val);
+      int val = atomic_load(visualData->atomicCounter);
+      printf("\n%d\n", val);
 
       int maxMag = 1;
       for (int ch = 0; ch < 2; ch++)
@@ -47,28 +45,36 @@ void *visualMain(void *visualData_)
           {
             maxMag = bufferAtomicEQ[index];
           }
+          // if (i > 3 && i < 12)
+          // {
+          // }
         }
+        printf("\n");
       }
 
       for (int i = 0; i < 2 * visualData->buffer_frames_d2p1; i++)
       {
-        bufferAtomicEQ_norm[i] = ( 10.0 * bufferAtomicEQ[i] ) / maxMag;
-        // printf(
-        //   " ==>> %i, %f <<== \n", 
-        //   i, 
-        //   bufferAtomicEQ_norm[i] // ( bufferAtomicEQ[i] * 1000.0 ) / ( visualData->buffer_frames * maxMag )
-        // );
+        printf(
+          " ==>> %i, %f <<== \n", 
+          i, 
+          ( bufferAtomicEQ[i] * 1000.0 ) / ( visualData->buffer_frames * maxMag )
+        );
       }
 
-      system("clear");
-      drawGraph(bufferAtomicEQ_norm);
 
+
+      // TODO:
+        //  drawGraph(val, &atomicEQ)
+        //  
+        //  - atomicEQ[0-31] is 32 band EQ for left
+        //  - atomicEQ[32-63] is 32 band EQ for right
+
+      drawGraph(val);
       frameCounter = 0;
     }
   }
 
   free(bufferAtomicEQ);
-  free(bufferAtomicEQ_norm);
   printf("\nVisual Thread Signing Off");
   pthread_exit((void *) 0);
 }

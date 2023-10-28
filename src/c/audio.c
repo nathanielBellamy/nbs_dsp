@@ -67,7 +67,7 @@ int init_pa(AUDIO_DATA *audioData, atomic_int *atomicCounter)
   // allocate memory to compute fast fourier transform in pa_callback
   audioData->fft_buffer = (float*) fftwf_malloc(sizeof(float) * audioData->buffer_frames * audioData->sfinfo.channels);
   audioData->fft_time = (float*) fftwf_malloc(sizeof(float) * audioData->buffer_frames);
-  audioData->fft_freq = (fftwf_complex*) fftwf_malloc(sizeof(fftwf_complex) * audioData->buffer_frames);
+  audioData->fft_freq = (fftwf_complex*) fftwf_malloc(sizeof(fftwf_complex) * audioData->buffer_frames_d2p1);
   audioData->fft_plan_to_freq = fftwf_plan_dft_r2c_1d(
     audioData->buffer_frames, 
     audioData->fft_time,
@@ -84,8 +84,9 @@ int init_pa(AUDIO_DATA *audioData, atomic_int *atomicCounter)
   return 0;
 }
 
+// TODO: debug the math here
 int magnitude(fftwf_complex* z) {
-    return floor(1000000 * sqrt(z[0]*z[0] + z[1]*z[1]));
+    return (int) floor(1000000 * sqrt(4)); // sqrt(z[0]*z[0] + z[1]*z[1]));
 }
 
 static int callback(const void *inputBuffer, void *outputBuffer,
@@ -136,18 +137,23 @@ static int callback(const void *inputBuffer, void *outputBuffer,
       // compute fft
       fftwf_execute(audioData->fft_plan_to_freq);
       
-      // TODO:
-      //  - we only need the first audioData->buffer_frames/2
-      //  - but we shouldn't compute that number here
+      // share data with visual thread
       for (i = 0; i < audioData->buffer_frames_d2p1; i++)
       {
         fftwf_complex z = audioData->fft_freq[i];
+        float re = (&z)[0];
+        float im = (&z)[1];
+        int re_i = (int) floor( re );
+        int im_i = (int) floor( im );
+
+        int sqrt = (int) 1000 * floor( re_i * re_i + im_i * im_i );
+
         atomic_store(
-          audioData->atomicEQ + i + ( ch * audioData->buffer_frames_d2p1 ), 
-          magnitude(&z)
+          audioData->atomicEQ + ( i + ( ch * audioData->buffer_frames_d2p1 ) ), 
+          // magnitude(&audioData->fft_freq[i])
+          sqrt
         );
       }
-
 
       // transform back into time domain
       fftwf_execute(audioData->fft_plan_to_time);
