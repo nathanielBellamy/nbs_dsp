@@ -15,7 +15,12 @@ void drawGraph(float* counter);
 void *visualMain(void *visualData_) 
 {
   sleep(1); // let audio thread print its init data
-  int frameRate = 15000000;
+  //
+  // TODO:
+  //  - implement double buffer
+  //  - only render change 
+  //  - prevent flicker
+  int frameRate = 3000000; // 15000000;
   int frameCounter = 0;
   int *bufferAtomicEQ;
   float *bufferAtomicEQ_norm;
@@ -27,7 +32,7 @@ void *visualMain(void *visualData_)
   while( true )
   {
     frameCounter += 1;
-    if (frameCounter == frameRate - 5000)
+    if (frameCounter == frameRate - 1000)
     {
       system("clear");
     } 
@@ -36,6 +41,8 @@ void *visualMain(void *visualData_)
       // int val = atomic_load(visualData->atomicCounter);
       // printf("\n%d\n", val);
 
+      // TODO:
+      //   - maxMag should be per channel
       int maxMag = 1;
       for (int ch = 0; ch < 2; ch++)
       {
@@ -43,7 +50,7 @@ void *visualMain(void *visualData_)
         {
           int index = i + (ch * visualData->buffer_frames_d2p1);
           bufferAtomicEQ[index] = atomic_load(visualData->atomicEQ + index); // load ith atomic EQ
-          if ( bufferAtomicEQ[index] > maxMag )
+          if ( bufferAtomicEQ[index] > maxMag  && i < 18)
           {
             maxMag = bufferAtomicEQ[index];
           }
@@ -52,11 +59,13 @@ void *visualMain(void *visualData_)
 
       for (int i = 0; i < 2 * visualData->buffer_frames_d2p1; i++)
       {
-        bufferAtomicEQ_norm[i] = ( 10.0 * bufferAtomicEQ[i] ) / maxMag;
+        // bufferAtomicEQ_norm[i] = ( bufferAtomicEQ[i] ) / / / );
+        bufferAtomicEQ_norm[i] = (float) sqrtf( bufferAtomicEQ[i] / 1000.0 );
         // printf(
-        //   " ==>> %i, %f <<== \n", 
+        //   " ==>> %i, %i, %f <<== \n", 
         //   i, 
-        //   bufferAtomicEQ_norm[i] // ( bufferAtomicEQ[i] * 1000.0 ) / ( visualData->buffer_frames * maxMag )
+        //   bufferAtomicEQ[i],
+        //   bufferAtomicEQ_norm[i]
         // );
       }
 

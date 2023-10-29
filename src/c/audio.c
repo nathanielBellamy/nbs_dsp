@@ -143,15 +143,16 @@ static int callback(const void *inputBuffer, void *outputBuffer,
         fftwf_complex z = audioData->fft_freq[i];
         float re = (&z)[0];
         float im = (&z)[1];
-        int re_i = (int) floor( re );
-        int im_i = (int) floor( im );
+        int re_i = (int) floor( 1000 * re );
+        int im_i = (int) floor( 1000 * im );
 
-        int sqrt = (int) 1000 * floor( re_i * re_i + im_i * im_i );
+        int power = re_i * re_i + im_i * im_i;
+        // int sqrt = (int) floor( 100.0 *  power );
 
         atomic_store(
           audioData->atomicEQ + ( i + ( ch * audioData->buffer_frames_d2p1 ) ), 
           // magnitude(&audioData->fft_freq[i])
-          sqrt
+          power
         );
       }
 

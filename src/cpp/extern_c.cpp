@@ -17,14 +17,15 @@ void drawGraph(float* bufferAtomicEQ_norm)
 {
   Draw draw;
   Settings settings;
-  settings.yMax = 1.5;
-  settings.yMin = -1.5;
+  settings.yMax = 1.7;
+  settings.yMin = -0.2;
   settings.epsilon = 0.05;
   settings.displayHeight = 30;
+  settings.displayWidth = 90;
 
   vector<double> zeroPolynomialOfMaxDegree(1, 0);
-  vector<vector<double> > polynomialArray_L(32, zeroPolynomialOfMaxDegree);
-  vector<vector<double> > polynomialArray_R(32, zeroPolynomialOfMaxDegree);
+  vector<vector<double> > polynomialArray_L(16, zeroPolynomialOfMaxDegree);
+  vector<vector<double> > polynomialArray_R(16, zeroPolynomialOfMaxDegree);
 
   // int counterMod;
   // counterMod = counter % 1000;
@@ -37,5 +38,6 @@ void drawGraph(float* bufferAtomicEQ_norm)
     polynomialArray_L.at(i - 1).at(0) = bufferAtomicEQ_norm[i];
   }
   draw.renderPiecewise(polynomialArray_L, settings);
-  printf("\n ==>1,2,3<== ==>%f, %f, %f<===\n", bufferAtomicEQ_norm[6], bufferAtomicEQ_norm[7], bufferAtomicEQ_norm[8]);
+  printf("\n ==>  <== \n");
+  // printf("\n ==>1,2,3<== ==>%f, %f, %f<===\n", bufferAtomicEQ_norm[2], bufferAtomicEQ_norm[5], bufferAtomicEQ_norm[8]);
 };
