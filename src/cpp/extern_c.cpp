@@ -17,8 +17,8 @@ void drawGraph(float* bufferAtomicEQ_norm)
 {
   Draw draw;
   Settings settings;
-  settings.yMax = 1.7;
-  settings.yMin = -0.2;
+  settings.yMax = 1.26;
+  settings.yMin = -0.1;
   settings.epsilon = 0.05;
   settings.displayHeight = 30;
   settings.displayWidth = 90;

@@ -23,12 +23,12 @@ void *visualMain(void *visualData_)
   int frameRate = 3000000; // 15000000;
   int frameCounter = 0;
   // TODO:
-  // float smoothing_f = 1000.0;
-  // int smoothing_i = 1000;
+  float smoothing_f = 500.0;
+  int smoothing_i = 500;
 
   VISUAL_DATA *visualData = (VISUAL_DATA *) visualData_;
-  int bufferAtomicEq[100][2 * visualData->buffer_frames_d2p1];
-  float bufferAtomicEq_norm[100][2 * visualData->buffer_frames_d2p1];
+  int bufferAtomicEq[smoothing_i][2 * visualData->buffer_frames_d2p1];
+  float bufferAtomicEq_norm[smoothing_i][2 * visualData->buffer_frames_d2p1];
   float bufferAtomicEq_avg[2 * visualData->buffer_frames_d2p1];
   // bufferAtomicEq = (int *) malloc(2 * visualData->buffer_frames_d2p1 * sizeof(int));
   // bufferAtomicEq_norm = (float *) malloc(2 * visualData->buffer_frames_d2p1 * sizeof(float));
@@ -36,11 +36,11 @@ void *visualMain(void *visualData_)
   while( true )
   {
     frameCounter += 1;
-    if (frameCounter == frameRate - 100)
+    if ( frameCounter == frameRate - smoothing_i )
     {
       system("clear");
     } 
-    else if (frameCounter >= frameRate - 100 && frameCounter < frameRate) 
+    else if (frameCounter >= frameRate - smoothing_i && frameCounter < frameRate) 
     {
       // int val = atomic_load(visualData->atomicCounter);
       // printf("\n%d\n", val);
@@ -49,24 +49,25 @@ void *visualMain(void *visualData_)
 
       // TODO:
       //   - maxMag should be per channel
-      int maxMag = 1;
+      int maxPower = 1;
       for (int ch = 0; ch < 2; ch++)
       {
         for (int i = 0; i < visualData->buffer_frames_d2p1; i++)
         {
           int index = i + (ch * visualData->buffer_frames_d2p1);
           bufferAtomicEq[frameIndex][index] = atomic_load(visualData->atomicEQ + index); // load ith atomic EQ
-          if ( bufferAtomicEq[frameIndex][index] > maxMag  && i < 18)
+          if ( bufferAtomicEq[frameIndex][index] > maxPower  && i < 18)
           {
-            maxMag = bufferAtomicEq[frameIndex][index];
+            maxPower = bufferAtomicEq[frameIndex][index];
           }
         }
       }
+      float maxMag = sqrt( (float) maxPower );
 
       for (int i = 0; i < 2 * visualData->buffer_frames_d2p1; i++)
       {
         // bufferAtomicEq_norm[i] = ( bufferAtomicEq[i] ) / / / );
-        bufferAtomicEq_norm[frameIndex][i] = (float) sqrtf( bufferAtomicEq[frameIndex][i] / 100.0 );
+        bufferAtomicEq_norm[frameIndex][i] = (float) 100.0 * sqrtf( bufferAtomicEq[frameIndex][i] ) / maxMag;
         // printf(
         //   " ==>> %i, %i, %f <<== \n", 
         //   i, 
@@ -80,11 +81,11 @@ void *visualMain(void *visualData_)
       for (int i = 0; i < 2 * visualData->buffer_frames_d2p1; i++)
       {
         float total = 0.0;
-        for (int j = 0; j < 100; j++)
+        for (int j = 0; j < smoothing_i; j++)
         {
           total += bufferAtomicEq_norm[j][i];
         }
-        bufferAtomicEq_avg[i] = total / 100.0;
+        bufferAtomicEq_avg[i] = total / smoothing_f;
       }
       drawGraph(bufferAtomicEq_avg);
       frameCounter = 0;
