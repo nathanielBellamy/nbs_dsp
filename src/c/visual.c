@@ -22,24 +22,30 @@ void *visualMain(void *visualData_)
   //  - prevent flicker
   int frameRate = 3000000; // 15000000;
   int frameCounter = 0;
-  int *bufferAtomicEQ;
-  float *bufferAtomicEQ_norm;
+  // TODO:
+  // float smoothing_f = 1000.0;
+  // int smoothing_i = 1000;
 
   VISUAL_DATA *visualData = (VISUAL_DATA *) visualData_;
-  bufferAtomicEQ = (int *) malloc(2 * visualData->buffer_frames_d2p1 * sizeof(int));
-  bufferAtomicEQ_norm = (float *) malloc(2 * visualData->buffer_frames_d2p1 * sizeof(float));
+  int bufferAtomicEq[100][2 * visualData->buffer_frames_d2p1];
+  float bufferAtomicEq_norm[100][2 * visualData->buffer_frames_d2p1];
+  float bufferAtomicEq_avg[2 * visualData->buffer_frames_d2p1];
+  // bufferAtomicEq = (int *) malloc(2 * visualData->buffer_frames_d2p1 * sizeof(int));
+  // bufferAtomicEq_norm = (float *) malloc(2 * visualData->buffer_frames_d2p1 * sizeof(float));
 
   while( true )
   {
     frameCounter += 1;
-    if (frameCounter == frameRate - 1000)
+    if (frameCounter == frameRate - 100)
     {
       system("clear");
     } 
-    else if (frameCounter == frameRate) 
+    else if (frameCounter >= frameRate - 100 && frameCounter < frameRate) 
     {
       // int val = atomic_load(visualData->atomicCounter);
       // printf("\n%d\n", val);
+        //
+      int frameIndex = frameRate - frameCounter;
 
       // TODO:
       //   - maxMag should be per channel
@@ -49,35 +55,44 @@ void *visualMain(void *visualData_)
         for (int i = 0; i < visualData->buffer_frames_d2p1; i++)
         {
           int index = i + (ch * visualData->buffer_frames_d2p1);
-          bufferAtomicEQ[index] = atomic_load(visualData->atomicEQ + index); // load ith atomic EQ
-          if ( bufferAtomicEQ[index] > maxMag  && i < 18)
+          bufferAtomicEq[frameIndex][index] = atomic_load(visualData->atomicEQ + index); // load ith atomic EQ
+          if ( bufferAtomicEq[frameIndex][index] > maxMag  && i < 18)
           {
-            maxMag = bufferAtomicEQ[index];
+            maxMag = bufferAtomicEq[frameIndex][index];
           }
         }
       }
 
       for (int i = 0; i < 2 * visualData->buffer_frames_d2p1; i++)
       {
-        // bufferAtomicEQ_norm[i] = ( bufferAtomicEQ[i] ) / / / );
-        bufferAtomicEQ_norm[i] = (float) sqrtf( bufferAtomicEQ[i] / 1000.0 );
+        // bufferAtomicEq_norm[i] = ( bufferAtomicEq[i] ) / / / );
+        bufferAtomicEq_norm[frameIndex][i] = (float) sqrtf( bufferAtomicEq[frameIndex][i] / 100.0 );
         // printf(
         //   " ==>> %i, %i, %f <<== \n", 
         //   i, 
-        //   bufferAtomicEQ[i],
-        //   bufferAtomicEQ_norm[i]
+        //   bufferAtomicEq[i],
+        //   bufferAtomicEq_norm[i]
         // );
       }
-
-      system("clear");
-      drawGraph(bufferAtomicEQ_norm);
-
+    }
+    else if ( frameCounter == frameRate ) 
+    {
+      for (int i = 0; i < 2 * visualData->buffer_frames_d2p1; i++)
+      {
+        float total = 0.0;
+        for (int j = 0; j < 100; j++)
+        {
+          total += bufferAtomicEq_norm[j][i];
+        }
+        bufferAtomicEq_avg[i] = total / 100.0;
+      }
+      drawGraph(bufferAtomicEq_avg);
       frameCounter = 0;
     }
   }
 
-  free(bufferAtomicEQ);
-  free(bufferAtomicEQ_norm);
+  // free(bufferAtomicEq);
+  // free(bufferAtomicEq_norm);
   printf("\nVisual Thread Signing Off");
   pthread_exit((void *) 0);
 }
