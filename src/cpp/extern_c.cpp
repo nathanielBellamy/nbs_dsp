@@ -1,6 +1,7 @@
 #include<iostream>
 #include<string>
 #include "extern_c.h"
+#include "../cpp/PolynomialConsoleGraph/src/Compute.h"
 #include "../cpp/PolynomialConsoleGraph/src/Draw.h"
 #include "../cpp/PolynomialConsoleGraph/src/Settings.h"
 #include "Cli.h"
@@ -15,6 +16,7 @@ void bar()
 
 void drawGraph(float* bufferAtomicEQ_norm)
 {
+  Compute compute;
   Draw draw;
   Settings settings;
   settings.yMax = 1.26;
@@ -22,6 +24,7 @@ void drawGraph(float* bufferAtomicEQ_norm)
   settings.epsilon = 0.05;
   settings.displayHeight = 30;
   settings.displayWidth = 90;
+  settings.stepHeight = 
 
   vector<double> zeroPolynomialOfMaxDegree(1, 0);
   vector<vector<double> > polynomialArray_L(16, zeroPolynomialOfMaxDegree);
