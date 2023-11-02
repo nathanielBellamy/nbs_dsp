@@ -14,18 +14,20 @@ void bar()
   Cli::intro();
 };
 
-void drawGraph(float* bufferAtomicEQ_norm)
+void drawGraph(float* bufferAtomicEQ_norm, void* settingsIn)
 {
   Draw draw;
-  Settings settings;
-  settings.yMax = 1.26;
-  settings.yMin = -0.1;
-  settings.epsilon = 0.05;
-  settings.displayHeight = 30;
-  settings.displayWidth = 90;
-  settings.stepHeight = Compute::stepHeight(&settings);
-  settings.stepWidth = Compute::stepWidth(&settings);
-  settings.xStepCount = Compute::xStepCount(&settings);
+  Settings *settings;
+  settings = static_cast<Settings*>(settingsIn);
+
+  settings->yMax = 1.26;
+  settings->yMin = -0.1;
+  settings->epsilon = 0.05;
+  settings->displayHeight = 30;
+  settings->displayWidth = 90;
+  settings->stepHeight = Compute::stepHeight(settings);
+  settings->stepWidth = Compute::stepWidth(settings);
+  settings->xStepCount = Compute::xStepCount(settings);
 
   vector<double> zeroPolynomialOfMaxDegree(1, 0);
   vector<vector<double> > polynomialArray_L(16, zeroPolynomialOfMaxDegree);

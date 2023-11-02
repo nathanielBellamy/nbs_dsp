@@ -11,7 +11,7 @@
 #include "../cpp/extern_c.h"
 
 // extern_c.h
-void drawGraph(float* bufferAtomicEq_avg);
+void drawGraph(float* bufferAtomicEq_avg, void *settingsIn);
 int xStepCount(void* settings);
 double stepWidth(void* settings);
 double stepHeight(void* settings);
@@ -36,14 +36,13 @@ void *visualMain(void *visualData_)
   // bufferAtomicEq_norm = (float *) malloc(2 * visualData->buffer_frames_d2p1 * sizeof(float));
 
   // TODO:
-  // - init Settings here 
-  //   - return a struct from cpp
-  // - init graphCurr[displayHeight][displayWidth]
-  // - init graphNext[displayHeight][displayWidth]
-  // - pass &graphNext to drawGraph and updates 
-  // - loop in here to compare 
-  //  - update only those indices changed in the rendered graph
-  // - set graphCurr = graphNext
+  // -[x]init Settings here 
+  // -[ ] init graphCurr[displayHeight][displayWidth]
+  // -[ ] init graphNext[displayHeight][displayWidth]
+  // -[ ] pass &graphNext to drawGraph and updates 
+  // -[ ] loop in here to compare 
+  //  -[ ] update only those indices changed in the rendered graph
+  // -[ ] set graphCurr = graphNext
   //
   //
   // TODO:
@@ -64,6 +63,8 @@ void *visualMain(void *visualData_)
   settings.stepWidth = stepWidth((void *) &settings);
   settings.stepHeight = stepHeight((void *) &settings);
   settings.xStepCount = xStepCount((void *) &settings);
+
+
 
 
 
@@ -121,7 +122,7 @@ void *visualMain(void *visualData_)
         }
         bufferAtomicEq_avg[i] = total / smoothing_f;
       }
-      drawGraph(bufferAtomicEq_avg);
+      drawGraph(bufferAtomicEq_avg, (void *) &settings);
       frameCounter = 0;
     }
   }

@@ -6,7 +6,7 @@ extern "C" {
 #endif
 
 void bar();
-void drawGraph(float* counter);
+void drawGraph(float* counter, void* settingsIn);
 int xStepCount(void* settings);
 double stepWidth(void* settings);
 double stepHeight(void* settings);
