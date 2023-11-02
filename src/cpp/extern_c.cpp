@@ -16,7 +16,6 @@ void bar()
 
 void drawGraph(float* bufferAtomicEQ_norm)
 {
-  Compute compute;
   Draw draw;
   Settings settings;
   settings.yMax = 1.26;
@@ -24,7 +23,9 @@ void drawGraph(float* bufferAtomicEQ_norm)
   settings.epsilon = 0.05;
   settings.displayHeight = 30;
   settings.displayWidth = 90;
-  settings.stepHeight = 
+  settings.stepHeight = Compute::stepHeight(settings);
+  settings.stepWidth = Compute::stepWidth(settings);
+  settings.xStepCount = Compute::xStepCount(settings);
 
   vector<double> zeroPolynomialOfMaxDegree(1, 0);
   vector<vector<double> > polynomialArray_L(16, zeroPolynomialOfMaxDegree);
