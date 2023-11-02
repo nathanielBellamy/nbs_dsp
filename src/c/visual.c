@@ -14,6 +14,8 @@ void drawGraph(float* counter);
 
 void *visualMain(void *visualData_) 
 {
+  // TODO:
+  //  - the visual thread should display the data
   sleep(1); // let audio thread print its init data
   //
   // TODO:
@@ -32,6 +34,16 @@ void *visualMain(void *visualData_)
   float bufferAtomicEq_avg[2 * visualData->buffer_frames_d2p1];
   // bufferAtomicEq = (int *) malloc(2 * visualData->buffer_frames_d2p1 * sizeof(int));
   // bufferAtomicEq_norm = (float *) malloc(2 * visualData->buffer_frames_d2p1 * sizeof(float));
+
+  // TODO:
+  // - init Settings here 
+  //   - return a struct from cpp
+  // - init graphCurr[displayHeight][displayWidth]
+  // - init graphNext[displayHeight][displayWidth]
+  // - pass &graphNext to drawGraph and updates 
+  // - loop in here to compare 
+  //  - update only those indices changed in the rendered graph
+  // - set graphCurr = graphNext
 
   while( true )
   {
@@ -92,8 +104,6 @@ void *visualMain(void *visualData_)
     }
   }
 
-  // free(bufferAtomicEq);
-  // free(bufferAtomicEq_norm);
   printf("\nVisual Thread Signing Off");
   pthread_exit((void *) 0);
 }
