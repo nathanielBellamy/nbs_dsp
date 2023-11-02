@@ -5,23 +5,23 @@
 #include <math.h>
 #include <pthread.h>
 #include <unistd.h>
+#include "settings.h"
 #include "visual.h"
 #include "visual_data.h"
 #include "../cpp/extern_c.h"
 
 // extern_c.h
-void drawGraph(float* counter);
+void drawGraph(float* bufferAtomicEq_avg);
+int xStepCount(void* settings);
+double stepWidth(void* settings);
+double stepHeight(void* settings);
 
 void *visualMain(void *visualData_) 
 {
   // TODO:
   //  - the visual thread should display the data
   sleep(1); // let audio thread print its init data
-  //
-  // TODO:
-  //  - implement double buffer
-  //  - only render change 
-  //  - prevent flicker
+
   int frameRate = 3000000; // 15000000;
   int frameCounter = 0;
   // TODO:
@@ -44,6 +44,28 @@ void *visualMain(void *visualData_)
   // - loop in here to compare 
   //  - update only those indices changed in the rendered graph
   // - set graphCurr = graphNext
+  //
+  //
+  // TODO:
+  // - get and update settings from user
+  
+  SETTINGS settings;
+	settings.backgroundChar= '.';
+	settings.originChar = '+';
+	settings.xAxisChar = '-';
+	settings.yAxisChar = '|';
+	settings.xMin = -1.3;
+	settings.xMax = 1.3;
+	settings.yMin = -1.3;
+	settings.yMax = 1.3;
+	settings.epsilon = 0.1;
+  settings.displayWidth = 80;
+  settings.displayHeight = 30;
+  settings.stepWidth = stepWidth((void *) &settings);
+  settings.stepHeight = stepHeight((void *) &settings);
+  settings.xStepCount = xStepCount((void *) &settings);
+
+
 
   while( true )
   {

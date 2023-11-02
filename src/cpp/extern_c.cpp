@@ -23,9 +23,9 @@ void drawGraph(float* bufferAtomicEQ_norm)
   settings.epsilon = 0.05;
   settings.displayHeight = 30;
   settings.displayWidth = 90;
-  settings.stepHeight = Compute::stepHeight(settings);
-  settings.stepWidth = Compute::stepWidth(settings);
-  settings.xStepCount = Compute::xStepCount(settings);
+  settings.stepHeight = Compute::stepHeight(&settings);
+  settings.stepWidth = Compute::stepWidth(&settings);
+  settings.xStepCount = Compute::xStepCount(&settings);
 
   vector<double> zeroPolynomialOfMaxDegree(1, 0);
   vector<vector<double> > polynomialArray_L(16, zeroPolynomialOfMaxDegree);
@@ -44,4 +44,25 @@ void drawGraph(float* bufferAtomicEQ_norm)
   draw.renderPiecewise(polynomialArray_L, settings);
   printf("\n ==>  <== \n");
   // printf("\n ==>1,2,3<== ==>%f, %f, %f<===\n", bufferAtomicEQ_norm[2], bufferAtomicEQ_norm[5], bufferAtomicEQ_norm[8]);
+};
+
+int xStepCount(void *settingsIn)
+{
+  Settings *settings;
+  settings = static_cast<Settings*>(settingsIn);
+  return Compute::xStepCount(settings);
+};
+
+double stepWidth(void *settingsIn)
+{
+  Settings *settings;
+  settings = static_cast<Settings*>(settingsIn);
+  return Compute::stepWidth(settings);
+};
+
+double stepHeight(void *settingsIn)
+{
+  Settings *settings;
+  settings = static_cast<Settings*>(settingsIn);
+  return Compute::stepWidth(settings);
 };

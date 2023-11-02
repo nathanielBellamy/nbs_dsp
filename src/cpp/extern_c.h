@@ -7,6 +7,9 @@ extern "C" {
 
 void bar();
 void drawGraph(float* counter);
+int xStepCount(void* settings);
+double stepWidth(void* settings);
+double stepHeight(void* settings);
 
 #ifdef __cplusplus
 }
