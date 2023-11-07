@@ -11,7 +11,13 @@
 #include "../cpp/extern_c.h"
 
 // extern_c.h
-void drawGraph(float* bufferAtomicEq_avg, void *settingsIn);
+// void drawGraph(float* bufferAtomicEq_avg, void *settingsIn);
+void updateGraph(
+  float* bufferAtomicEq_avg,
+  char (*graphCurr)[30][80],
+  char (*graphNext)[30][80],
+  void *settingsIn
+);
 int xStepCount(void* settings);
 double stepWidth(void* settings);
 double stepHeight(void* settings);
@@ -20,7 +26,7 @@ void *visualMain(void *visualData_)
 {
   // TODO:
   //  - the visual thread should display the data
-  sleep(1); // let audio thread print its init data
+  sleep(3); // let audio thread print its init data
 
   int frameRate = 3000000; // 15000000;
   int frameCounter = 0;
@@ -64,9 +70,8 @@ void *visualMain(void *visualData_)
   settings.stepHeight = stepHeight((void *) &settings);
   settings.xStepCount = xStepCount((void *) &settings);
 
-
-
-
+  char graphCurr[30][80] = {'.'};
+  char graphNext[30][80] = {'.'};
 
   while( true )
   {
@@ -122,7 +127,26 @@ void *visualMain(void *visualData_)
         }
         bufferAtomicEq_avg[i] = total / smoothing_f;
       }
-      drawGraph(bufferAtomicEq_avg, (void *) &settings);
+      
+      updateGraph(
+        bufferAtomicEq_avg,
+        &graphCurr,
+        &graphNext,
+        (void *) &settings
+      );
+
+      for (int i = 0; i < 30; i++)
+      {
+        for (int j = 0; j < 80; j++)
+        {
+          printf("%c", graphCurr[i][j]);
+        }
+        printf("\n");
+      }
+
+      printf("============");
+
+      // drawGraph(bufferAtomicEq_avg, (void *) &settings);
       frameCounter = 0;
     }
   }

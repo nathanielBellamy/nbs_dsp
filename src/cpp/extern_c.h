@@ -6,7 +6,13 @@ extern "C" {
 #endif
 
 void bar();
-void drawGraph(float* counter, void* settingsIn);
+// void drawGraph(float* counter, void* settingsIn);
+void updateGraph(
+  float* bufferAtomicEq_avg,
+  char (*graphCurr)[30][80],
+  char (*graphNext)[30][80],
+  void *settingsIn
+);
 int xStepCount(void* settings);
 double stepWidth(void* settings);
 double stepHeight(void* settings);
