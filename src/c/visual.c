@@ -26,7 +26,7 @@ void *visualMain(void *visualData_)
 {
   // TODO:
   //  - the visual thread should display the data
-  sleep(3); // let audio thread print its init data
+  sleep(1); // let audio thread print its init data
 
   int frameRate = 3000000; // 15000000;
   int frameCounter = 0;
@@ -61,8 +61,8 @@ void *visualMain(void *visualData_)
 	settings.yAxisChar = '|';
 	settings.xMin = -1.3;
 	settings.xMax = 1.3;
-	settings.yMin = -1.3;
-	settings.yMax = 1.3;
+	settings.yMin = -0.1;
+	settings.yMax = 1.1;
 	settings.epsilon = 0.1;
   settings.displayWidth = 80;
   settings.displayHeight = 30;
@@ -106,14 +106,7 @@ void *visualMain(void *visualData_)
 
       for (int i = 0; i < 2 * visualData->buffer_frames_d2p1; i++)
       {
-        // bufferAtomicEq_norm[i] = ( bufferAtomicEq[i] ) / / / );
         bufferAtomicEq_norm[frameIndex][i] = (float) 100.0 * sqrtf( bufferAtomicEq[frameIndex][i] ) / maxMag;
-        // printf(
-        //   " ==>> %i, %i, %f <<== \n", 
-        //   i, 
-        //   bufferAtomicEq[i],
-        //   bufferAtomicEq_norm[i]
-        // );
       }
     }
     else if ( frameCounter == frameRate ) 
@@ -139,12 +132,12 @@ void *visualMain(void *visualData_)
       {
         for (int j = 0; j < 80; j++)
         {
-          printf("%c", graphCurr[i][j]);
+          printf("%c", graphNext[i][j]);
         }
         printf("\n");
       }
 
-      printf("============");
+      printf("\n ============ \n");
 
       // drawGraph(bufferAtomicEq_avg, (void *) &settings);
       frameCounter = 0;

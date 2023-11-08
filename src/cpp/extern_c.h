@@ -6,7 +6,6 @@ extern "C" {
 #endif
 
 void bar();
-// void drawGraph(float* counter, void* settingsIn);
 void updateGraph(
   float* bufferAtomicEq_avg,
   char (*graphCurr)[30][80],
