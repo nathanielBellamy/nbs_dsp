@@ -43,9 +43,9 @@ void *visualMain(void *visualData_)
 
   // TODO:
   // -[x]init Settings here 
-  // -[ ] init graphCurr[displayHeight][displayWidth]
-  // -[ ] init graphNext[displayHeight][displayWidth]
-  // -[ ] pass &graphNext to drawGraph and updates 
+  // -[x] init graphCurr[displayHeight][displayWidth]
+  // -[x] init graphNext[displayHeight][displayWidth]
+  // -[x] pass &graphNext and &graphCurr to updateGraph
   // -[ ] loop in here to compare 
   //  -[ ] update only those indices changed in the rendered graph
   // -[ ] set graphCurr = graphNext
