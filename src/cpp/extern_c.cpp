@@ -33,19 +33,6 @@ void updateGraph(
       graphNext
     );
   }
-
-  for (int i = 0; i < 30; i++) // row
-  {
-    for (int j = 0; j < 80; j++) // column
-    {
-      if ((*graphCurr)[i][j] != (*graphNext)[i][j])
-      {
-        (*graphCurr)[i][j] = (*graphNext)[i][j];
-        // printf("\x1b[%i;%iH", i, j);
-        // printf("%c", (*graphCurr)[i][j]);
-      }
-    }
-  }
 };
 
 int xStepCount(void *settingsIn)

@@ -18,6 +18,7 @@ typedef struct {
     double stepWidth;
     int xStepCount;
     double epsilon;
+    bool pieceWise;
 } SETTINGS;
 
 #endif

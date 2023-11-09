@@ -78,7 +78,7 @@ void *visualMain(void *visualData_)
     frameCounter += 1;
     if ( frameCounter == frameRate - smoothing_i )
     {
-      system("clear");
+      // system("clear");
     } 
     else if (frameCounter >= frameRate - smoothing_i && frameCounter < frameRate) 
     {
@@ -128,18 +128,19 @@ void *visualMain(void *visualData_)
         (void *) &settings
       );
 
-      for (int i = 0; i < 30; i++)
+      for (int i = 29; i > -1; i--) // draws from top to bottom
       {
         for (int j = 0; j < 80; j++)
         {
-          printf("%c", graphNext[i][j]);
+          if (graphCurr[i][j] != graphNext[i][j])
+          {
+            printf("\033[%d;%dH", 30 - i, j);
+            printf("%c", graphNext[i][j]);
+            graphCurr[i][j] = graphNext[i][j];
+          }
         }
         printf("\n");
       }
-
-      printf("\n ============ \n");
-
-      // drawGraph(bufferAtomicEq_avg, (void *) &settings);
       frameCounter = 0;
     }
   }
