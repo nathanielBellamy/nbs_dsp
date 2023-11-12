@@ -63,7 +63,7 @@ void *visualMain(void *visualData_)
 	settings.xMax = 1.3;
 	settings.yMin = -0.1;
 	settings.yMax = 1.1;
-	settings.epsilon = 0.1;
+	settings.epsilon = 0.05;
   settings.displayWidth = 80;
   settings.displayHeight = 30;
   settings.stepWidth = stepWidth((void *) &settings);
@@ -72,6 +72,15 @@ void *visualMain(void *visualData_)
 
   char graphCurr[30][80] = {'.'};
   char graphNext[30][80] = {'.'};
+
+  for (int i = 29; i > -1; i--) // draws from top to bottom
+  {
+    for (int j = 0; j < 80; j++)
+    {
+      printf("%c", graphNext[i][j]);
+    }
+    printf("\n");
+  }
 
   while( true )
   {
@@ -135,11 +144,10 @@ void *visualMain(void *visualData_)
           if (graphCurr[i][j] != graphNext[i][j])
           {
             printf("\033[%d;%dH", 30 - i, j);
-            printf("%c", graphNext[i][j]);
             graphCurr[i][j] = graphNext[i][j];
+            printf("%c", graphCurr[i][j]);
           }
         }
-        printf("\n");
       }
       frameCounter = 0;
     }

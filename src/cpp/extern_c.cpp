@@ -23,11 +23,29 @@ void updateGraph(
 {
   Settings *settings;
   settings = static_cast<Settings*>(settingsIn);
+  
+  double polynomialArray[16][16];
+  for (int i = 0; i < 16; i++)
+  {
+    polynomialArray[i][0] = static_cast<double>(bufferAtomicEQ_avg[i + 1]);
+    for (int j = 1; j < 16; j++)
+    {
+      polynomialArray[i][j] = 0;
+    }
+  }
+
+	double image[80];
+  for (int i = 0; i < 80; i++)
+  {
+      image[i] = 0;
+  }
+	Compute::piecewsieImage(&polynomialArray, &image, settings);
+  // printf("foo foo foo %f", image[50]);
 
   for (int i = 0; i < 30; i++) // row
   {
     Draw::createRowPiecewise(
-      bufferAtomicEQ_avg, 
+      &image,
       i, 
       settings,
       graphNext
