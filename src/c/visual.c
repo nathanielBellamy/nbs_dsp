@@ -73,6 +73,14 @@ void *visualMain(void *visualData_)
   printf("\nFrames: %lli", visualData->audioData->sfinfo.frames);
   printf("\nFormat: %dl", visualData->audioData->sfinfo.format);
 
+  // TODO:
+  //   - L + R graphs
+  //   - header
+  //   - footer
+  //   - border
+  //   - pick a band
+  //   - increase/decrease boost with up/down keys
+
   while( true )
   {
     frameCounter += 1;
