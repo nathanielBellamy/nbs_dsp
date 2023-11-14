@@ -18,6 +18,8 @@ void updateGraph(
   float* bufferAtomicEQ_avg,
   char (*graphCurr)[30][80],
   char (*graphNext)[30][80],
+  int offsetX,
+  int offsetY,
   void* settingsIn
 )
 {
@@ -40,7 +42,6 @@ void updateGraph(
       image[i] = 0;
   }
 	Compute::piecewsieImage(&polynomialArray, &image, settings);
-  // printf("foo foo foo %f", image[50]);
 
   for (int i = 0; i < 30; i++) // row
   {
@@ -50,6 +51,19 @@ void updateGraph(
       settings,
       graphNext
     );
+  }
+
+  for (int i = 29; i > -1; i--) // draws from top to bottom
+  {
+    for (int j = 0; j < 80; j++)
+    {
+      if ((*graphCurr)[i][j] != (*graphNext)[i][j])
+      {
+        (*graphCurr)[i][j] = (*graphNext)[i][j];
+        printf("\033[%d;%dH", 30 - i + offsetY, j + offsetX); // move to char location
+        printf("%c", (*graphCurr)[i][j]); // update char on screen
+      }
+    }
   }
 };
 

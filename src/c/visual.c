@@ -16,6 +16,8 @@ void updateGraph(
   float* bufferAtomicEq_avg,
   char (*graphCurr)[30][80],
   char (*graphNext)[30][80],
+  int offsetX,
+  int offsetY,
   void *settingsIn
 );
 int xStepCount(void* settings);
@@ -132,21 +134,11 @@ void *visualMain(void *visualData_)
         bufferAtomicEq_avg,
         &graphCurr,
         &graphNext,
+        5,
+        5,
         (void *) &settings
       );
 
-      for (int i = 29; i > -1; i--) // draws from top to bottom
-      {
-        for (int j = 0; j < 80; j++)
-        {
-          if (graphCurr[i][j] != graphNext[i][j])
-          {
-            graphCurr[i][j] = graphNext[i][j];
-            printf("\033[%d;%dH", 40 - i, j);
-            printf("%c", graphCurr[i][j]);
-          }
-        }
-      }
       frameCounter = 0;
     }
   }
