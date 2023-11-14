@@ -37,7 +37,6 @@ int init_pa(AUDIO_DATA *audioData, atomic_int *atomicCounter)
   audioData->index = 0;
   audioData->buffer_frames = 32;
   audioData->buffer_frames_d2p1 = 17;
-  printf("\npa_idx_start: %lli", audioData->index);
 
   if (! (audioData->file = sf_open("gtfam_mini.wav", SFM_READ, &audioData->sfinfo)))
   {
@@ -46,11 +45,6 @@ int init_pa(AUDIO_DATA *audioData, atomic_int *atomicCounter)
 		puts (sf_strerror (NULL)) ;
     return 1 ;
   };
-  
-  // Display some information about the file.
-  printf("\nSample rate: %d", audioData->sfinfo.samplerate);
-  printf("\nChannels: %d", audioData->sfinfo.channels);
-  printf("\nFrames: %lli", audioData->sfinfo.frames);
   
   // Allocate memory for data
   audioData->buffer = (float *) malloc(audioData->sfinfo.frames * audioData->sfinfo.channels * sizeof(float));
@@ -62,8 +56,6 @@ int init_pa(AUDIO_DATA *audioData, atomic_int *atomicCounter)
   // Read the audio data into buffer
   long readcount = sf_read_float(audioData->file, audioData->buffer, audioData->sfinfo.frames * audioData->sfinfo.channels);
   
-  printf("\nreadcount: %ld", readcount);
-
   // allocate memory to compute fast fourier transform in pa_callback
   audioData->fft_buffer = (float*) fftwf_malloc(sizeof(float) * audioData->buffer_frames * audioData->sfinfo.channels);
   audioData->fft_time = (float*) fftwf_malloc(sizeof(float) * audioData->buffer_frames);
@@ -175,7 +167,6 @@ static int callback(const void *inputBuffer, void *outputBuffer,
     }
   }
 
-  // printf("idx: %lli \n", audioData->index);
   return paContinue;
 }
 
@@ -185,11 +176,6 @@ void *audioMain(void *audioData_)
   PaStreamParameters inputParameters, outputParameters;
   PaStream *stream;
   PaError err;
-  
-  printf("\natomicCounter: %i", *audioData->atomicCounter);
-  printf("\npa_samplerate: %i", audioData->sfinfo.samplerate);
-  printf("\npa_buff_frames: %lli", audioData->buffer_frames);
-  printf("\npa_format: %i", audioData->sfinfo.format);
 
   err = Pa_Initialize();
   if( err != paNoError ) goto error;
@@ -233,10 +219,8 @@ void *audioMain(void *audioData_)
   err = Pa_StopStream( stream );
   if( err != paNoError ) goto error;
 
-  printf("\npa cleanup");
   err = Pa_CloseStream( stream );
   if( err != paNoError ) goto error;
-  printf("\npa_idx_end: %lli", audioData->index);
   Pa_Terminate();
   pthread_exit((void *) 0);
 

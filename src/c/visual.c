@@ -57,17 +57,21 @@ void *visualMain(void *visualData_)
   settings.stepHeight = stepHeight((void *) &settings);
   settings.xStepCount = xStepCount((void *) &settings);
 
-  char graphCurr[30][80] = {'.'};
-  char graphNext[30][80] = {'.'};
+  char graphCurr[30][80];
+  char graphNext[30][80];
 
-  for (int i = 29; i > -1; i--) // draws from top to bottom
-  {
-    for (int j = 0; j < 80; j++)
-    {
-      printf("%c", graphNext[i][j]);
-    }
-    printf("\n");
-  }
+  //
+  // RENDER
+  // 
+  system("clear");
+
+  printf("\n======>>NBS<<==>>DSP<<========");
+
+  // Display some information about the file.
+  printf("\nSample rate: %d", visualData->audioData->sfinfo.samplerate);
+  printf("\nChannels: %d", visualData->audioData->sfinfo.channels);
+  printf("\nFrames: %lli", visualData->audioData->sfinfo.frames);
+  printf("\nFormat: %dl", visualData->audioData->sfinfo.format);
 
   while( true )
   {
@@ -130,7 +134,7 @@ void *visualMain(void *visualData_)
           if (graphCurr[i][j] != graphNext[i][j])
           {
             graphCurr[i][j] = graphNext[i][j];
-            printf("\033[%d;%dH", 30 - i, j);
+            printf("\033[%d;%dH", 40 - i, j);
             printf("%c", graphCurr[i][j]);
           }
         }

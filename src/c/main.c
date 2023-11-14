@@ -70,8 +70,10 @@ int main(void) {
   VISUAL_DATA visualData;
   visualData.atomicCounter = &atomicCounter;
   visualData.atomicEQ = atomicEQ;
+  // TODO: simplify visualData
   visualData.buffer_frames = audioData.buffer_frames;
   visualData.buffer_frames_d2p1 = audioData.buffer_frames_d2p1;
+  visualData.audioData = &audioData;
 
   int tv_create_err = pthread_create(
     &thread_visual,
