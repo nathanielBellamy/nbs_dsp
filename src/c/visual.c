@@ -28,32 +28,19 @@ void *visualMain(void *visualData_)
   //  - the visual thread should display the data
   sleep(1); // let audio thread print its init data
 
-  int frameRate = 3000000; // 15000000;
+  int frameRate = 5000000; // 15000000;
   int frameCounter = 0;
   // TODO:
-  float smoothing_f = 500.0;
-  int smoothing_i = 500;
+  float smoothing_f = 1500.0;
+  int smoothing_i = 1500;
 
   VISUAL_DATA *visualData = (VISUAL_DATA *) visualData_;
   int bufferAtomicEq[smoothing_i][2 * visualData->buffer_frames_d2p1];
   float bufferAtomicEq_norm[smoothing_i][2 * visualData->buffer_frames_d2p1];
   float bufferAtomicEq_avg[2 * visualData->buffer_frames_d2p1];
-  // bufferAtomicEq = (int *) malloc(2 * visualData->buffer_frames_d2p1 * sizeof(int));
-  // bufferAtomicEq_norm = (float *) malloc(2 * visualData->buffer_frames_d2p1 * sizeof(float));
 
   // TODO:
-  // -[x]init Settings here 
-  // -[x] init graphCurr[displayHeight][displayWidth]
-  // -[x] init graphNext[displayHeight][displayWidth]
-  // -[x] pass &graphNext and &graphCurr to updateGraph
-  // -[ ] loop in here to compare 
-  //  -[ ] update only those indices changed in the rendered graph
-  // -[ ] set graphCurr = graphNext
-  //
-  //
-  // TODO:
   // - get and update settings from user
-  
   SETTINGS settings;
 	settings.backgroundChar= '.';
 	settings.originChar = '+';
@@ -61,8 +48,8 @@ void *visualMain(void *visualData_)
 	settings.yAxisChar = '|';
 	settings.xMin = -1.3;
 	settings.xMax = 1.3;
-	settings.yMin = -0.1;
-	settings.yMax = 1.1;
+	settings.yMin = 0.0;
+	settings.yMax = 1.0;
 	settings.epsilon = 0.05;
   settings.displayWidth = 80;
   settings.displayHeight = 30;
@@ -93,7 +80,6 @@ void *visualMain(void *visualData_)
     {
       // int val = atomic_load(visualData->atomicCounter);
       // printf("\n%d\n", val);
-        //
       int frameIndex = frameRate - frameCounter;
 
       // TODO:
@@ -115,7 +101,7 @@ void *visualMain(void *visualData_)
 
       for (int i = 0; i < 2 * visualData->buffer_frames_d2p1; i++)
       {
-        bufferAtomicEq_norm[frameIndex][i] = (float) 100.0 * sqrtf( bufferAtomicEq[frameIndex][i] ) / maxMag;
+        bufferAtomicEq_norm[frameIndex][i] = (float) 80.0 * sqrtf( bufferAtomicEq[frameIndex][i] ) / maxMag;
       }
     }
     else if ( frameCounter == frameRate ) 
@@ -143,8 +129,8 @@ void *visualMain(void *visualData_)
         {
           if (graphCurr[i][j] != graphNext[i][j])
           {
-            printf("\033[%d;%dH", 30 - i, j);
             graphCurr[i][j] = graphNext[i][j];
+            printf("\033[%d;%dH", 30 - i, j);
             printf("%c", graphCurr[i][j]);
           }
         }
