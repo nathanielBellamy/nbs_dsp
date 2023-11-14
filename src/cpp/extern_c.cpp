@@ -14,6 +14,15 @@ void bar()
   Cli::intro();
 };
 
+
+// TODO:
+// - updateGraph accepts an array doubles instead of a float
+//   - move cast into C
+// - uprep L and R arrays in C and pass into updateGraph
+// - use offsetX and offsetY to align the graphs horizontally
+// - reduce graph width 80 -> 64
+// - use a belowChar to fill in EQ bar integrals
+//
 void updateGraph(
   float* bufferAtomicEQ_avg,
   char (*graphCurr)[30][80],

@@ -26,10 +26,6 @@ double stepHeight(void* settings);
 
 void *visualMain(void *visualData_) 
 {
-  // TODO:
-  //  - the visual thread should display the data
-  sleep(1); // let audio thread print its init data
-
   int frameRate = 5000000; // 15000000;
   int frameCounter = 0;
   // TODO:
@@ -135,7 +131,7 @@ void *visualMain(void *visualData_)
         &graphCurr,
         &graphNext,
         5,
-        5,
+        7,
         (void *) &settings
       );
 
