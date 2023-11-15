@@ -78,12 +78,12 @@ void *visualMain(void *visualData_)
   printf("\nFormat: %dl", visualData->audioData->sfinfo.format);
 
   // TODO:
-  //   - L + R graphs
-  //   - header
-  //   - footer
-  //   - border
-  //   - pick a band
-  //   - increase/decrease boost with up/down keys
+  //   -[X] L + R graphs
+  //   -[ ] header
+  //   -[ ] footer
+  //   -[ ] border
+  //   -[ ] pick a band
+  //   -[ ] increase/decrease boost with up/down keys
 
   while( true )
   {
