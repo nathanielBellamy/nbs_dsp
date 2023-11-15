@@ -24,7 +24,7 @@ void bar()
 // - use a belowChar to fill in EQ bar integrals
 //
 void updateGraph(
-  float* bufferAtomicEQ_avg,
+  double (*polynomialArray)[16][16],
   char (*graphCurr)[30][80],
   char (*graphNext)[30][80],
   int offsetX,
@@ -34,23 +34,13 @@ void updateGraph(
 {
   Settings *settings;
   settings = static_cast<Settings*>(settingsIn);
-  
-  double polynomialArray[16][16];
-  for (int i = 0; i < 16; i++)
-  {
-    polynomialArray[i][0] = static_cast<double>(bufferAtomicEQ_avg[i + 1]);
-    for (int j = 1; j < 16; j++)
-    {
-      polynomialArray[i][j] = 0;
-    }
-  }
 
 	double image[80];
   for (int i = 0; i < 80; i++)
   {
       image[i] = 0;
   }
-	Compute::piecewsieImage(&polynomialArray, &image, settings);
+	Compute::piecewsieImage(polynomialArray, &image, settings);
 
   for (int i = 0; i < 30; i++) // row
   {

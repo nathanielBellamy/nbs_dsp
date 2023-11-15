@@ -13,7 +13,7 @@
 // extern_c.h
 // void drawGraph(float* bufferAtomicEq_avg, void *settingsIn);
 void updateGraph(
-  float* bufferAtomicEq_avg,
+  double (*polynomialArray)[16][16],
   char (*graphCurr)[30][80],
   char (*graphNext)[30][80],
   int offsetX,
@@ -55,8 +55,14 @@ void *visualMain(void *visualData_)
   settings.stepHeight = stepHeight((void *) &settings);
   settings.xStepCount = xStepCount((void *) &settings);
 
-  char graphCurr[30][80];
-  char graphNext[30][80];
+  char graphCurrL[30][80];
+  char graphCurrR[30][80];
+
+  char graphNextL[30][80];
+  char graphNextR[30][80];
+  
+  double polynomialArrayL[16][16];
+  double polynomialArrayR[16][16];
 
   //
   // RENDER
@@ -125,12 +131,39 @@ void *visualMain(void *visualData_)
         }
         bufferAtomicEq_avg[i] = total / smoothing_f;
       }
+
+      for (int i = 0; i < 16; i++)
+      {
+        polynomialArrayL[i][0] = (double) (bufferAtomicEq_avg[i + 1]);
+        for (int j = 1; j < 16; j++)
+        {
+          polynomialArrayL[i][j] = 0;
+        }
+      }
+
+      for (int i = 0; i < 16; i++)
+      {
+        polynomialArrayR[i][0] = (double) (bufferAtomicEq_avg[i + 17]);
+        for (int j = 1; j < 16; j++)
+        {
+          polynomialArrayR[i][j] = 0;
+        }
+      }
       
       updateGraph(
-        bufferAtomicEq_avg,
-        &graphCurr,
-        &graphNext,
+        &polynomialArrayL,
+        &graphCurrL,
+        &graphNextL,
         5,
+        7,
+        (void *) &settings
+      );
+      
+      updateGraph(
+        &polynomialArrayR,
+        &graphCurrR,
+        &graphNextR,
+        95,
         7,
         (void *) &settings
       );

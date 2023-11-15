@@ -7,7 +7,7 @@ extern "C" {
 
 void bar();
 void updateGraph(
-  float* bufferAtomicEq_avg,
+  double (*polynomialArray)[16][16],
   char (*graphCurr)[30][80],
   char (*graphNext)[30][80],
   int offsetX,
