@@ -14,14 +14,19 @@ void bar()
   Cli::intro();
 };
 
+// TODO:
+//  -[ ] Printer.cpp
+//    -[ ] pass in variables from C
+//    -[ ] keep track of what is displayed where
+//    -[ ] offer an update api
 
 // TODO:
 // -[X] updateGraph accepts an array doubles instead of a float
 //   -[X] move cast into C
 // -[X] prep L and R arrays in C and pass into updateGraph
 // -[X] use offsetX and offsetY to align the graphs
-// - reduce graph width 80 -> 64
-// - use a belowChar to fill in EQ bar integrals
+// -[ ] reduce graph width 80 -> 64
+// -[ ] use a belowChar to fill in EQ bar integrals
 //
 void updateGraph(
   double (*polynomialArray)[16][16],

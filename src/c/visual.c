@@ -26,7 +26,7 @@ double stepHeight(void* settings);
 
 void *visualMain(void *visualData_) 
 {
-  int frameRate = 5000000; // 15000000;
+  int frameRate = 20000000; // 15000000;
   int frameCounter = 0;
   // TODO:
   float smoothing_f = 1500.0;
