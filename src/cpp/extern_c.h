@@ -8,8 +8,8 @@ extern "C" {
 void bar();
 void updateGraph(
   double (*polynomialArray)[16][16],
-  char (*graphCurr)[30][80],
-  char (*graphNext)[30][80],
+  char (*graphCurr)[32][64],
+  char (*graphNext)[32][64],
   int offsetX,
   int offsetY,
   void *settingsIn

@@ -5,6 +5,7 @@
 #include "../cpp/PolynomialConsoleGraph/src/Draw.h"
 #include "../cpp/PolynomialConsoleGraph/src/Settings.h"
 #include "Cli.h"
+#include "GraphRef.h"
 
 using namespace std;
 
@@ -25,13 +26,13 @@ void bar()
 //   -[X] move cast into C
 // -[X] prep L and R arrays in C and pass into updateGraph
 // -[X] use offsetX and offsetY to align the graphs
-// -[ ] reduce graph width 80 -> 64
+// -[ ] reduce graph width 64 -> 64
 // -[ ] use a belowChar to fill in EQ bar integrals
 //
 void updateGraph(
   double (*polynomialArray)[16][16],
-  char (*graphCurr)[30][80],
-  char (*graphNext)[30][80],
+  GraphRefM graphCurr,
+  GraphRefM graphNext,
   int offsetX,
   int offsetY,
   void* settingsIn
@@ -40,14 +41,14 @@ void updateGraph(
   Settings *settings;
   settings = static_cast<Settings*>(settingsIn);
 
-	double image[80];
-  for (int i = 0; i < 80; i++)
+	double image[64];
+  for (int i = 0; i < 64; i++)
   {
       image[i] = 0;
   }
 	Compute::piecewsieImage(polynomialArray, &image, settings);
 
-  for (int i = 0; i < 30; i++) // row
+  for (int i = 0; i < 32; i++) // row
   {
     Draw::createRowPiecewise(
       &image,
@@ -57,18 +58,16 @@ void updateGraph(
     );
   }
 
-  for (int i = 29; i > -1; i--) // draws from top to bottom
-  {
-    for (int j = 0; j < 80; j++)
-    {
-      if ((*graphCurr)[i][j] != (*graphNext)[i][j])
-      {
-        (*graphCurr)[i][j] = (*graphNext)[i][j];
-        printf("\033[%d;%dH", 30 - i + offsetY, j + offsetX); // move to char location
-        printf("%c", (*graphCurr)[i][j]); // update char on screen
-      }
-    }
-  }
+  GraphRef<GraphRefM> 
+  graphRef(
+      "foo",
+      graphCurr,
+      graphNext,
+      offsetX,
+      offsetY
+  );
+
+  graphRef.update();
 };
 
 int xStepCount(void *settingsIn)

@@ -14,8 +14,8 @@
 // void drawGraph(float* bufferAtomicEq_avg, void *settingsIn);
 void updateGraph(
   double (*polynomialArray)[16][16],
-  char (*graphCurr)[30][80],
-  char (*graphNext)[30][80],
+  char (*graphCurr)[32][64],
+  char (*graphNext)[32][64],
   int offsetX,
   int offsetY,
   void *settingsIn
@@ -26,9 +26,9 @@ double stepHeight(void* settings);
 
 void *visualMain(void *visualData_) 
 {
-  int frameRate = 20000000; // 15000000;
+  int frameRate = 15000000; // 15000000;
   int frameCounter = 0;
-  // TODO:
+
   float smoothing_f = 1500.0;
   int smoothing_i = 1500;
 
@@ -49,17 +49,17 @@ void *visualMain(void *visualData_)
 	settings.yMin = 0.0;
 	settings.yMax = 1.0;
 	settings.epsilon = 0.05;
-  settings.displayWidth = 80;
-  settings.displayHeight = 30;
+  settings.displayWidth = 64;
+  settings.displayHeight = 32;
   settings.stepWidth = stepWidth((void *) &settings);
   settings.stepHeight = stepHeight((void *) &settings);
   settings.xStepCount = xStepCount((void *) &settings);
 
-  char graphCurrL[30][80];
-  char graphCurrR[30][80];
+  char graphCurrL[32][64];
+  char graphCurrR[32][64];
 
-  char graphNextL[30][80];
-  char graphNextR[30][80];
+  char graphNextL[32][64];
+  char graphNextR[32][64];
   
   double polynomialArrayL[16][16];
   double polynomialArrayR[16][16];
@@ -117,7 +117,7 @@ void *visualMain(void *visualData_)
 
       for (int i = 0; i < 2 * visualData->buffer_frames_d2p1; i++)
       {
-        bufferAtomicEq_norm[frameIndex][i] = (float) 80.0 * sqrtf( bufferAtomicEq[frameIndex][i] ) / maxMag;
+        bufferAtomicEq_norm[frameIndex][i] = (float) 64.0 * sqrtf( bufferAtomicEq[frameIndex][i] ) / maxMag;
       }
     }
     else if ( frameCounter == frameRate ) 
@@ -154,7 +154,7 @@ void *visualMain(void *visualData_)
         &polynomialArrayL,
         &graphCurrL,
         &graphNextL,
-        5,
+        10,
         7,
         (void *) &settings
       );
@@ -163,7 +163,7 @@ void *visualMain(void *visualData_)
         &polynomialArrayR,
         &graphCurrR,
         &graphNextR,
-        95,
+        85,
         7,
         (void *) &settings
       );
