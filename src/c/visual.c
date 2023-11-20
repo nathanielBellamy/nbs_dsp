@@ -11,7 +11,7 @@
 #include "../cpp/extern_c.h"
 
 // extern_c.h
-// void drawGraph(float* bufferAtomicEq_avg, void *settingsIn);
+void drawHeader(void* visualData);
 void updateGraph(
   double (*polynomialArray)[16][16],
   char (*graphCurr)[32][64],
@@ -69,13 +69,8 @@ void *visualMain(void *visualData_)
   // 
   system("clear");
 
-  printf("\n======>>NBS<<==>>DSP<<========");
+  drawHeader((void*) &visualData);
 
-  // Display some information about the file.
-  printf("\nSample rate: %d", visualData->audioData->sfinfo.samplerate);
-  printf("\nChannels: %d", visualData->audioData->sfinfo.channels);
-  printf("\nFrames: %lli", visualData->audioData->sfinfo.frames);
-  printf("\nFormat: %dl", visualData->audioData->sfinfo.format);
 
   // TODO:
   //   -[X] L + R graphs

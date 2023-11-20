@@ -15,6 +15,11 @@ void bar()
   Cli::intro();
 };
 
+void drawHeader(void *visualData)
+{
+
+};
+
 // TODO:
 //  -[ ] Printer.cpp
 //    -[ ] pass in variables from C
@@ -26,7 +31,7 @@ void bar()
 //   -[X] move cast into C
 // -[X] prep L and R arrays in C and pass into updateGraph
 // -[X] use offsetX and offsetY to align the graphs
-// -[ ] reduce graph width 64 -> 64
+// -[X] reduce graph width 80 -> 64
 // -[ ] use a belowChar to fill in EQ bar integrals
 //
 void updateGraph(
