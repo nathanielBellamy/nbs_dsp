@@ -36,7 +36,7 @@ void drawHeader(void *visualData)
 //
 void updateGraph(
   double (*polynomialArray)[16][16],
-  GraphRefM graphCurr,
+  RasterRef raster,
   GraphRefM graphNext,
   int offsetX,
   int offsetY,
@@ -66,7 +66,7 @@ void updateGraph(
   GraphRef<GraphRefM> 
   graphRef(
       "foo",
-      graphCurr,
+      raster,
       graphNext,
       offsetX,
       offsetY

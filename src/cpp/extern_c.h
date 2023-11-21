@@ -9,7 +9,7 @@ void bar();
 void drawHeader(void* visualData);
 void updateGraph(
   double (*polynomialArray)[16][16],
-  char (*graphCurr)[32][64],
+  char (*raster)[256][256],
   char (*graphNext)[32][64],
   int offsetX,
   int offsetY,
