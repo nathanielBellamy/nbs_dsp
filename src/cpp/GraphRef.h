@@ -9,8 +9,8 @@
 #define GR_W_M 64
 #define GR_W_L 128
 
-#define RASTER_H 256
-#define RASTER_W 256
+#define RASTER_H 156
+#define RASTER_W 156
 
 typedef char (*RasterRef)[RASTER_H][RASTER_W];
 
@@ -23,7 +23,7 @@ void updatePriv(RasterRef raster, T patch, int offsetX, int offsetY, int height,
 {
     for (int i = height - 1; i > -1; i--) // draws from top to bottom
     {
-      int row = height - i + offsetY; // in raster
+      int row = i + offsetY; // in raster
       for (int j = 0; j < width; j++)
       {
         int col = j + offsetX; // in raster
@@ -35,7 +35,7 @@ void updatePriv(RasterRef raster, T patch, int offsetX, int offsetY, int height,
         { // only engage in i/o if we have to
           (*raster)[row][col] = (*patch)[i][j];
           printf("\033[%d;%dH", row, col); // move to char location
-          printf("%c", (*raster)[i][j]); // update char on screen
+          printf("%c", (*patch)[i][j]); // update char on screen
         }
       }
     }

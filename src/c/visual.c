@@ -14,7 +14,7 @@
 void drawHeader(void* visualData);
 void updateGraph(
   double (*polynomialArray)[16][16],
-  char (*raster)[256][256],
+  char (*raster)[156][156],
   char (*graphNext)[32][64],
   int offsetX,
   int offsetY,
@@ -26,11 +26,11 @@ double stepHeight(void* settings);
 
 void *visualMain(void *visualData_) 
 {
-  int frameRate = 12560000; // 12560000;
+  int frameRate = 12560000; // 11560000;
   int frameCounter = 0;
 
-  float smoothing_f = 1256.0;
-  int smoothing_i = 1256;
+  float smoothing_f = 1156.0;
+  int smoothing_i = 1156;
 
   VISUAL_DATA *visualData = (VISUAL_DATA *) visualData_;
   int bufferAtomicEq[smoothing_i][2 * visualData->buffer_frames_d2p1];
@@ -55,10 +55,10 @@ void *visualMain(void *visualData_)
   settings.stepHeight = stepHeight((void *) &settings);
   settings.xStepCount = xStepCount((void *) &settings);
 
-  char raster[256][256] = {'.'};
+  char raster[156][156] = {'\0'};
 
-  char graphNextL[32][64];
-  char graphNextR[32][64];
+  char graphNextL[32][64] = {'L'};
+  char graphNextR[32][64] = {'R'};
   
   double polynomialArrayL[16][16];
   double polynomialArrayR[16][16];
@@ -67,6 +67,9 @@ void *visualMain(void *visualData_)
   // RENDER
   // 
   system("clear");
+
+  // hide cursor
+  // printf("\e[?25l");
 
   drawHeader((void*) &visualData);
 
