@@ -37,13 +37,18 @@ void updatePriv(RasterRef raster, T patch, int offsetX, int offsetY, int height,
           (*raster)[row][col] = patchChar;
           if (patchChar == '#')
           {
-            // Set color to black
-            printf("\e[40m");
+            // Set color to cyan
+            printf("\e[48;5;12m");
+          }
+          else if (patchChar == 'o')
+          {
+            // Set color to light blue
+            printf("\e[48;5;25m");
           }
           else
           {
-            // Set color to white
-            printf("\e[44m");
+            // Set color to dark blue
+            printf("\e[48;5;18m");
           }
           printf("\033[%d;%dH", row, col); // move to char location
           printf("%c", ' '); // update char on screen
