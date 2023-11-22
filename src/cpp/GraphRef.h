@@ -27,15 +27,31 @@ void updatePriv(RasterRef raster, T patch, int offsetX, int offsetY, int height,
       for (int j = 0; j < width; j++)
       {
         int col = j + offsetX; // in raster
-        if (row > RASTER_H || col > RASTER_W || (*patch)[i][j] == '\0')
+        char patchChar = (*patch)[i][j];
+        if (row > RASTER_H || col > RASTER_W || patchChar == '\0')
         {
           // do nothing
         }
-        else if ((*raster)[row][col] != (*patch)[i][j])
+        else if ((*raster)[row][col] != patchChar)
         { // only engage in i/o if we have to
-          (*raster)[row][col] = (*patch)[i][j];
+          (*raster)[row][col] = patchChar;
+          if (patchChar == '#')
+          {
+            // Set color to black
+            printf("\e[40m");
+          }
+          else
+          {
+            // Set color to white
+            printf("\e[44m");
+          }
           printf("\033[%d;%dH", row, col); // move to char location
-          printf("%c", (*patch)[i][j]); // update char on screen
+          printf("%c", ' '); // update char on screen
+          if (patchChar == '#')
+          {
+            // Reset text color to default
+            printf("\033[0m");
+          }
         }
       }
     }
