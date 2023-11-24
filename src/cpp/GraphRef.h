@@ -65,7 +65,6 @@ void updatePriv(RasterRef raster, T patch, int offsetX, int offsetY, int height,
 template <typename T>
 class GraphRef {
 private:
-    RasterRef raster; // ref to full memoery representation of full rendered screen
     T patch; // ref to new patch to draw to raster
     int offsetX;
     int offsetY;
@@ -75,8 +74,8 @@ private:
 public:
     string name;
 
-    GraphRef(T raster, T patch, int offsetX, int offsetY)
-      : raster(raster)
+    GraphRef(string name, T patch, int offsetX, int offsetY)
+      : name(name)
       , patch(patch)
       , offsetX(offsetX)
       , offsetY(offsetY)
@@ -84,13 +83,12 @@ public:
       , width{5}
       {};
     
-    void update() {};
+    void update(RasterRef raster) {};
 };
 
 template <>
 class GraphRef<GraphRefS> {
 private:
-    RasterRef raster;
     GraphRefS patch;
     int offsetX;
     int offsetY;
@@ -100,9 +98,8 @@ private:
 public:
     string name;
 
-    GraphRef(string name, RasterRef raster, GraphRefS patch, int offsetX, int offsetY)
+    GraphRef(string name, GraphRefS patch, int offsetX, int offsetY)
       : name(name)
-      , raster(raster)
       , patch(patch)
       , offsetX(offsetX)
       , offsetY(offsetY)
@@ -110,7 +107,7 @@ public:
       , width(GR_W_S) 
       {};
 
-    void update()
+    void update(RasterRef raster)
     {
       updatePriv<GraphRefS>(raster, patch, offsetX, offsetY, height, width);
     };
@@ -119,7 +116,6 @@ public:
 template <>
 class GraphRef<GraphRefM> {
 private:
-    RasterRef raster;
     GraphRefM patch;
     int offsetX;
     int offsetY;
@@ -128,9 +124,8 @@ private:
 
 public:
     string name;
-    GraphRef(string name, RasterRef raster, GraphRefM patch, int offsetX, int offsetY)
+    GraphRef(string name, GraphRefM patch, int offsetX, int offsetY)
       : name(name)
-      , raster(raster)
       , patch(patch)
       , offsetX(offsetX)
       , offsetY(offsetY)
@@ -138,7 +133,7 @@ public:
       , width(GR_W_M) 
       {};
 
-    void update()
+    void update(RasterRef raster)
     {
       updatePriv<GraphRefM>(raster, patch, offsetX, offsetY, height, width);
     };
@@ -147,7 +142,6 @@ public:
 template <>
 class GraphRef<GraphRefL> {
 private:
-    RasterRef raster;
     GraphRefL patch;
     int offsetX;
     int offsetY;
@@ -156,9 +150,8 @@ private:
 
 public:
     string name;
-    GraphRef(string name, RasterRef raster, GraphRefL patch, int offsetX, int offsetY)
+    GraphRef(string name, GraphRefL patch, int offsetX, int offsetY)
       : name(name)
-      , raster(raster)
       , patch(patch)
       , offsetX(offsetX)
       , offsetY(offsetY)
@@ -166,7 +159,7 @@ public:
       , width(GR_W_L) 
       {};
 
-    void update()
+    void update(RasterRef raster)
     {
       updatePriv<GraphRefL>(raster, patch, offsetX, offsetY, height, width);
     };

@@ -18,6 +18,10 @@ void bar()
 void drawHeader(void *visualData)
 {
 
+  GraphRefS headerTitle;
+  // TODO: 
+  //  - method to input string into a Graph
+  //  - set offset and color
 };
 
 // TODO:
@@ -46,11 +50,7 @@ void updateGraph(
   Settings *settings;
   settings = static_cast<Settings*>(settingsIn);
 
-	double image[64];
-  for (int i = 0; i < 64; i++)
-  {
-      image[i] = 0;
-  }
+	double image[64] = { 0 };
 	Compute::piecewsieImage(polynomialArray, &image, settings);
 
   for (int i = 0; i < 32; i++) // row
@@ -66,13 +66,12 @@ void updateGraph(
   GraphRef<GraphRefM> 
   graphRef(
       "foo",
-      raster,
       graphNext,
       offsetX,
       offsetY
   );
 
-  graphRef.update();
+  graphRef.update(raster);
 };
 
 int xStepCount(void *settingsIn)

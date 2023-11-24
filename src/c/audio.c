@@ -38,7 +38,7 @@ int init_pa(AUDIO_DATA *audioData, atomic_int *atomicCounter)
   audioData->buffer_frames = 32;
   audioData->buffer_frames_d2p1 = 17;
 
-  if (! (audioData->file = sf_open("gtfam_mini.wav", SFM_READ, &audioData->sfinfo)))
+  if (! (audioData->file = sf_open("test-piano.wav", SFM_READ, &audioData->sfinfo)))
   {
 		printf ("Not able to open input file.\n") ;
 		/* Print the error message from libsndfile. */
@@ -98,7 +98,7 @@ static int callback(const void *inputBuffer, void *outputBuffer,
 
   if( audioData->buffer == NULL )
   {
-      for( i=0; i<framesPerBuffer; i++ )
+      for( i=0; i < framesPerBuffer; i++ )
       {
           *out++ = 0;  /* left - silent */
           *out++ = 0;  /* right - silent */

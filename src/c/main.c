@@ -23,7 +23,7 @@ void bar(void);
 
 int main(void);
 int main(void) {
-  bar();
+  // bar();
   
   // init data
   atomic_int atomicCounter = ATOMIC_VAR_INIT(0);
@@ -48,10 +48,6 @@ int main(void) {
     atomicEQ[i] = ATOMIC_VAR_INIT(0);
   }
   audioData.atomicEQ = atomicEQ;
-
-  // TODO:
-  // audioData.atomicEQ = &atomicEQ;
-  // visualData.atomicEQ = &atomicEQl
 
   // init threads
   pthread_t thread_audio, thread_visual;
