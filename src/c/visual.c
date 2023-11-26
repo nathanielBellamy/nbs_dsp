@@ -11,7 +11,7 @@
 #include "../cpp/extern_c.h"
 
 // extern_c.h
-void drawHeader(void* visualData);
+void drawHeader(void* visualData, char (*raster)[156][156]);
 void updateGraph(
   double (*polynomialArray)[16][16],
   char (*raster)[156][156],
@@ -71,7 +71,7 @@ void *visualMain(void *visualData_)
   // hide cursor
   // printf("\e[?25l");
 
-  drawHeader((void*) &visualData);
+  drawHeader((void*) &visualData, &raster);
 
   // TODO:
   //   -[X] L + R graphs
@@ -154,7 +154,7 @@ void *visualMain(void *visualData_)
         7,
         (void *) &settings
       );
-      
+
       updateGraph(
         &polynomialArrayR,
         &raster,

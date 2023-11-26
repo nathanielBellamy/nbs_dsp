@@ -18,6 +18,9 @@ typedef char (*GraphRefS)[GR_H_S][GR_W_S];
 typedef char (*GraphRefM)[GR_H_M][GR_W_M];
 typedef char (*GraphRefL)[GR_H_L][GR_W_L];
 
+// TODO:
+//  - graph vs text pattern
+
 template <class T>
 void updatePriv(RasterRef raster, T patch, int offsetX, int offsetY, int height, int width)
 {
@@ -28,6 +31,7 @@ void updatePriv(RasterRef raster, T patch, int offsetX, int offsetY, int height,
       {
         int col = j + offsetX; // in raster
         char patchChar = (*patch)[i][j];
+        // printf("\n patchChar[%i][%i]: %c", i, j, patchChar);
         if (row > RASTER_H || col > RASTER_W || patchChar == '\0')
         {
           // do nothing
@@ -37,30 +41,55 @@ void updatePriv(RasterRef raster, T patch, int offsetX, int offsetY, int height,
           (*raster)[row][col] = patchChar;
           if (patchChar == '#')
           {
-            // Set color to cyan
+            // Set bg-color to cyan
             printf("\e[48;5;12m");
           }
           else if (patchChar == 'o')
           {
-            // Set color to light blue
+            // Set bg-color to light blue
             printf("\e[48;5;25m");
           }
           else
           {
-            // Set color to dark blue
+            // Set bg-color to dark blue
             printf("\e[48;5;18m");
           }
           printf("\033[%d;%dH", row, col); // move to char location
-          printf("%c", ' '); // update char on screen
-          if (patchChar == '#')
-          {
-            // Reset text color to default
-            printf("\033[0m");
-          }
+          printf("%c", patchChar); // update char on screen
+          
+          // Reset text color to default
+          printf("\033[0m");
         }
       }
     }
 };
+
+template<class T>
+void placeStringPriv(string input, T patch, int offsetX, int offsetY, int height, int width)
+{
+  if (offsetY > height)
+  {
+    return;
+  }
+
+  int col = 0;
+  for (char& c : input) 
+  {
+    // printf("\nchar %i: %c", col, c);
+    int colOffset = col + offsetX;
+    if (colOffset > width)
+    {
+      // do nothing
+    }
+    else
+    {
+      (*patch)[offsetY][colOffset] = (char) c;
+      // printf("\n patch[offsetY][colOffset]: %c", c);
+    }
+    
+    col += 1;
+  }
+}
 
 template <typename T>
 class GraphRef {
@@ -84,6 +113,8 @@ public:
       {};
     
     void update(RasterRef raster) {};
+    void placeString(string input, int innerOffsetY, int innerOffsetX); // string, row, col
+    
 };
 
 template <>
@@ -111,6 +142,11 @@ public:
     {
       updatePriv<GraphRefS>(raster, patch, offsetX, offsetY, height, width);
     };
+
+    void placeString(string input, int innerOffsetY, int innerOffsetX) // string, row, col
+    { // offset string within patch
+      placeStringPriv<GraphRefS>(input, patch, innerOffsetX, innerOffsetY, height, width);
+    };
 };
 
 template <>
@@ -137,6 +173,11 @@ public:
     {
       updatePriv<GraphRefM>(raster, patch, offsetX, offsetY, height, width);
     };
+
+    void placeString(string input, int innerOffsetY, int innerOffsetX) // string, row, col
+    { // offset string within patch
+      placeStringPriv<GraphRefM>(input, patch, innerOffsetX, innerOffsetY, height, width);
+    };
 };
 
 template <>
@@ -162,5 +203,10 @@ public:
     void update(RasterRef raster)
     {
       updatePriv<GraphRefL>(raster, patch, offsetX, offsetY, height, width);
+    };
+
+    void placeString(string input, int innerOffsetY, int innerOffsetX) // string, row, col
+    { // offset string within patch
+      placeStringPriv<GraphRefL>(input, patch, innerOffsetX, innerOffsetY, height, width);
     };
 };

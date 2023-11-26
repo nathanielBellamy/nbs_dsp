@@ -6,7 +6,7 @@ extern "C" {
 #endif
 
 void bar();
-void drawHeader(void* visualData);
+void drawHeader(void *visualData, char (*raster)[156][156]);
 void updateGraph(
   double (*polynomialArray)[16][16],
   char (*raster)[156][156],

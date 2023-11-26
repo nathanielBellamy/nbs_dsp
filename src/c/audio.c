@@ -18,7 +18,7 @@
 typedef float SAMPLE;
 
 void freeAudioData(AUDIO_DATA *audioData) {
-  printf("\nCleaning up resources...");
+  // printf("\nCleaning up resources...");
   
   free(audioData->buffer);
   fftwf_free(audioData->fft_buffer);
@@ -28,7 +28,7 @@ void freeAudioData(AUDIO_DATA *audioData) {
   fftwf_destroy_plan(audioData->fft_plan_to_time);
   sf_close(audioData->file);
   
-  printf("\nDone.");
+  // printf("\nDone.");
 };
 
 int init_pa(AUDIO_DATA *audioData, atomic_int *atomicCounter)
@@ -55,6 +55,10 @@ int init_pa(AUDIO_DATA *audioData, atomic_int *atomicCounter)
 
   // Read the audio data into buffer
   long readcount = sf_read_float(audioData->file, audioData->buffer, audioData->sfinfo.frames * audioData->sfinfo.channels);
+  if (readcount == 0) {
+      printf("\nCannot read file");
+      return 1;
+  }
   
   // allocate memory to compute fast fourier transform in pa_callback
   audioData->fft_buffer = (float*) fftwf_malloc(sizeof(float) * audioData->buffer_frames * audioData->sfinfo.channels);
@@ -213,7 +217,6 @@ void *audioMain(void *audioData_)
   err = Pa_StartStream( stream );
   if( err != paNoError ) goto error;
 
-  printf("\nHit ENTER to stop program.");
   char c;
   while( ( c = getchar() ) != '\n' && c != EOF ) {}
   err = Pa_StopStream( stream );

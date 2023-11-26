@@ -15,20 +15,22 @@ void bar()
   Cli::intro();
 };
 
-void drawHeader(void *visualData)
+void drawHeader(void *visualData, RasterRef raster)
 {
+  char patch[GR_H_M][GR_W_M] = {{ '\0' }};
 
-  GraphRefS headerTitle;
-  // TODO: 
-  //  - method to input string into a Graph
-  //  - set offset and color
+  GraphRef<GraphRefM>
+  headerTitle(
+      "headerTitle",
+      &patch,
+      0,
+      0
+  );
+  headerTitle.placeString("=== Welcome to NBSDSP-TerminalWAV === ", 2, 2);
+  headerTitle.placeString("=== Glad you could be here === ", 3, 2);
+  headerTitle.placeString("=== Hit ENTER to stop program. ===", 4, 2);
+  headerTitle.update(raster);
 };
-
-// TODO:
-//  -[ ] Printer.cpp
-//    -[ ] pass in variables from C
-//    -[ ] keep track of what is displayed where
-//    -[ ] offer an update api
 
 // TODO:
 // -[X] updateGraph accepts an array doubles instead of a float
@@ -36,7 +38,7 @@ void drawHeader(void *visualData)
 // -[X] prep L and R arrays in C and pass into updateGraph
 // -[X] use offsetX and offsetY to align the graphs
 // -[X] reduce graph width 80 -> 64
-// -[ ] use a belowChar to fill in EQ bar integrals
+// -[X] use a belowChar to fill in EQ bar integrals
 //
 void updateGraph(
   double (*polynomialArray)[16][16],
