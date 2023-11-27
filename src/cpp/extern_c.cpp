@@ -29,7 +29,7 @@ void drawHeader(void *visualData, RasterRef raster)
   headerTitle.placeString("=== Welcome to NBSDSP-TerminalWAV === ", 2, 2);
   headerTitle.placeString("=== Glad you could be here === ", 3, 2);
   headerTitle.placeString("=== Hit ENTER to stop program. ===", 4, 2);
-  headerTitle.update(raster);
+  headerTitle.updateText(raster);
 };
 
 // TODO:
@@ -73,7 +73,7 @@ void updateGraph(
       offsetY
   );
 
-  graphRef.update(raster);
+  graphRef.updateGraph(raster);
 };
 
 int xStepCount(void *settingsIn)

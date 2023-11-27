@@ -150,8 +150,8 @@ void *visualMain(void *visualData_)
         &polynomialArrayL,
         &raster,
         &graphNextL,
-        10,
         7,
+        10,
         (void *) &settings
       );
 
@@ -159,8 +159,8 @@ void *visualMain(void *visualData_)
         &polynomialArrayR,
         &raster,
         &graphNextR,
-        85,
         7,
+        85,
         (void *) &settings
       );
 

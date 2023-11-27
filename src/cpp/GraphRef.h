@@ -19,10 +19,9 @@ typedef char (*GraphRefM)[GR_H_M][GR_W_M];
 typedef char (*GraphRefL)[GR_H_L][GR_W_L];
 
 // TODO:
-//  - graph vs text pattern
-
+//  - turn on/off printing char
 template <class T>
-void updatePriv(RasterRef raster, T patch, int offsetX, int offsetY, int height, int width)
+void updateGraphPriv(RasterRef raster, T patch, int offsetY, int offsetX, int height, int width)
 {
     for (int i = height - 1; i > -1; i--) // draws from top to bottom
     {
@@ -55,7 +54,7 @@ void updatePriv(RasterRef raster, T patch, int offsetX, int offsetY, int height,
             printf("\e[48;5;18m");
           }
           printf("\033[%d;%dH", row, col); // move to char location
-          printf("%c", patchChar); // update char on screen
+          printf("%c", ' '); // update char on screen
           
           // Reset text color to default
           printf("\033[0m");
@@ -64,8 +63,37 @@ void updatePriv(RasterRef raster, T patch, int offsetX, int offsetY, int height,
     }
 };
 
+// TODO: pass in text color options
+template <class T>
+void updateTextPriv(RasterRef raster, T patch, int offsetY, int offsetX, int height, int width)
+{
+    for (int i = height - 1; i > -1; i--) // draws from top to bottom
+    {
+      int row = i + offsetY; // in raster
+      for (int j = 0; j < width; j++)
+      {
+        int col = j + offsetX; // in raster
+        char patchChar = (*patch)[i][j];
+        // printf("\n patchChar[%i][%i]: %c", i, j, patchChar);
+        if (row > RASTER_H || col > RASTER_W || patchChar == '\0')
+        {
+          // do nothing
+        }
+        else if ((*raster)[row][col] != patchChar)
+        { // only engage in i/o if we have to
+          (*raster)[row][col] = patchChar;
+          printf("\033[%d;%dH", row, col); // move to char location
+          printf("%c", patchChar); // update char on screen
+          
+          // Reset text color to default
+          // printf("\033[0m");
+        }
+      }
+    }
+};
+
 template<class T>
-void placeStringPriv(string input, T patch, int offsetX, int offsetY, int height, int width)
+void placeStringPriv(string input, T patch, int offsetY, int offsetX, int height, int width)
 {
   if (offsetY > height)
   {
@@ -103,7 +131,7 @@ private:
 public:
     string name;
 
-    GraphRef(string name, T patch, int offsetX, int offsetY)
+    GraphRef(string name, T patch, int offsetY, int offsetX)
       : name(name)
       , patch(patch)
       , offsetX(offsetX)
@@ -112,8 +140,9 @@ public:
       , width{5}
       {};
     
-    void update(RasterRef raster) {};
     void placeString(string input, int innerOffsetY, int innerOffsetX); // string, row, col
+    void updateGraph(RasterRef raster) {};
+    void updateText(RasterRef raster) {};
     
 };
 
@@ -129,7 +158,7 @@ private:
 public:
     string name;
 
-    GraphRef(string name, GraphRefS patch, int offsetX, int offsetY)
+    GraphRef(string name, GraphRefS patch, int offsetY, int offsetX)
       : name(name)
       , patch(patch)
       , offsetX(offsetX)
@@ -138,15 +167,21 @@ public:
       , width(GR_W_S) 
       {};
 
-    void update(RasterRef raster)
-    {
-      updatePriv<GraphRefS>(raster, patch, offsetX, offsetY, height, width);
-    };
-
     void placeString(string input, int innerOffsetY, int innerOffsetX) // string, row, col
     { // offset string within patch
-      placeStringPriv<GraphRefS>(input, patch, innerOffsetX, innerOffsetY, height, width);
+      placeStringPriv<GraphRefS>(input, patch, innerOffsetY, innerOffsetX, height, width);
     };
+
+    void updateGraph(RasterRef raster)
+    {
+      updateGraphPriv<GraphRefS>(raster, patch, offsetY, offsetX, height, width);
+    };
+
+    void updateText(RasterRef raster)
+    {
+      updateTextPriv<GraphRefS>(raster, patch, offsetY, offsetX, height, width);
+    };
+
 };
 
 template <>
@@ -160,7 +195,7 @@ private:
 
 public:
     string name;
-    GraphRef(string name, GraphRefM patch, int offsetX, int offsetY)
+    GraphRef(string name, GraphRefM patch, int offsetY, int offsetX)
       : name(name)
       , patch(patch)
       , offsetX(offsetX)
@@ -169,14 +204,19 @@ public:
       , width(GR_W_M) 
       {};
 
-    void update(RasterRef raster)
-    {
-      updatePriv<GraphRefM>(raster, patch, offsetX, offsetY, height, width);
-    };
-
     void placeString(string input, int innerOffsetY, int innerOffsetX) // string, row, col
     { // offset string within patch
-      placeStringPriv<GraphRefM>(input, patch, innerOffsetX, innerOffsetY, height, width);
+      placeStringPriv<GraphRefM>(input, patch, innerOffsetY, innerOffsetX, height, width);
+    };
+
+    void updateGraph(RasterRef raster)
+    {
+      updateGraphPriv<GraphRefM>(raster, patch, offsetY, offsetX, height, width);
+    };
+
+    void updateText(RasterRef raster)
+    {
+      updateTextPriv<GraphRefM>(raster, patch, offsetY, offsetX, height, width);
     };
 };
 
@@ -191,7 +231,7 @@ private:
 
 public:
     string name;
-    GraphRef(string name, GraphRefL patch, int offsetX, int offsetY)
+    GraphRef(string name, GraphRefL patch, int offsetY, int offsetX)
       : name(name)
       , patch(patch)
       , offsetX(offsetX)
@@ -200,13 +240,18 @@ public:
       , width(GR_W_L) 
       {};
 
-    void update(RasterRef raster)
-    {
-      updatePriv<GraphRefL>(raster, patch, offsetX, offsetY, height, width);
-    };
-
     void placeString(string input, int innerOffsetY, int innerOffsetX) // string, row, col
     { // offset string within patch
-      placeStringPriv<GraphRefL>(input, patch, innerOffsetX, innerOffsetY, height, width);
+      placeStringPriv<GraphRefL>(input, patch, innerOffsetY, innerOffsetX, height, width);
+    };
+
+    void updateGraph(RasterRef raster)
+    {
+      updateGraphPriv<GraphRefL>(raster, patch, offsetY, offsetX, height, width);
+    };
+
+    void updateText(RasterRef raster)
+    {
+      updateTextPriv<GraphRefL>(raster, patch, offsetY, offsetX, height, width);
     };
 };
