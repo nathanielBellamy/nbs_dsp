@@ -15,14 +15,12 @@ void bar()
   Cli::intro();
 };
 
-void drawHeader(void *visualData, RasterRef raster)
+void drawHeader(void *visualData, GraphRefHDR header, RasterRef raster)
 {
-  char patch[GR_H_M][GR_W_M] = {{ '\0' }};
-
-  GraphRef<GraphRefM>
+  GraphRef<GraphRefHDR>
   headerTitle(
       "headerTitle",
-      &patch,
+      header,
       0,
       0
   );

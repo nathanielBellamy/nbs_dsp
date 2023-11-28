@@ -17,6 +17,7 @@ typedef char (*RasterRef)[RASTER_H][RASTER_W];
 typedef char (*GraphRefS)[GR_H_S][GR_W_S];
 typedef char (*GraphRefM)[GR_H_M][GR_W_M];
 typedef char (*GraphRefL)[GR_H_L][GR_W_L];
+typedef char (*GraphRefHDR)[GR_H_S][RASTER_W];
 
 // TODO:
 //  - turn on/off printing char
@@ -253,5 +254,41 @@ public:
     void updateText(RasterRef raster)
     {
       updateTextPriv<GraphRefL>(raster, patch, offsetY, offsetX, height, width);
+    };
+};
+
+template <>
+class GraphRef<GraphRefHDR> {
+private:
+    GraphRefHDR patch;
+    int offsetX;
+    int offsetY;
+    int height;
+    int width;
+
+public:
+    string name;
+    GraphRef(string name, GraphRefHDR patch, int offsetY, int offsetX)
+      : name(name)
+      , patch(patch)
+      , offsetX(offsetX)
+      , offsetY(offsetY)
+      , height(GR_H_S)
+      , width(RASTER_W) 
+      {};
+
+    void placeString(string input, int innerOffsetY, int innerOffsetX) // string, row, col
+    { // offset string within patch
+      placeStringPriv<GraphRefHDR>(input, patch, innerOffsetY, innerOffsetX, height, width);
+    };
+
+    void updateGraph(RasterRef raster)
+    {
+      updateGraphPriv<GraphRefHDR>(raster, patch, offsetY, offsetX, height, width);
+    };
+
+    void updateText(RasterRef raster)
+    {
+      updateTextPriv<GraphRefHDR>(raster, patch, offsetY, offsetX, height, width);
     };
 };
