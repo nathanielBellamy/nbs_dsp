@@ -11,6 +11,11 @@ void drawHeader(
   char (*header)[16][156],
   char (*raster)[156][156]
 );
+void updateHeader(
+  char (*header)[16][156],
+  char (*raster)[156][156],
+  int audioFrameId
+);
 void updateGraph(
   double (*polynomialArray)[16][16],
   char (*raster)[156][156],

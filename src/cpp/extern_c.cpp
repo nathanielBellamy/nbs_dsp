@@ -30,14 +30,23 @@ void drawHeader(void *visualData, GraphRefHDR header, RasterRef raster)
   headerTitle.updateText(raster);
 };
 
-// TODO:
-// -[X] updateGraph accepts an array doubles instead of a float
-//   -[X] move cast into C
-// -[X] prep L and R arrays in C and pass into updateGraph
-// -[X] use offsetX and offsetY to align the graphs
-// -[X] reduce graph width 80 -> 64
-// -[X] use a belowChar to fill in EQ bar integrals
-//
+void updateHeader(GraphRefHDR header, RasterRef raster, int audioFrameId)
+{
+  GraphRef<GraphRefHDR>
+  headerAudioFrameIdDisplay(
+      "headerAudioFrameId",
+      header,
+      0,
+      0
+  );
+  
+
+  headerAudioFrameIdDisplay.placeString("=== Welcome to NBSDSP-TerminalWAV === ", 2, 2);
+  headerAudioFrameIdDisplay.placeString("=== Glad you could be here === ", 3, 2);
+  headerAudioFrameIdDisplay.placeString("=== Hit ENTER to stop program. ===", 4, 2);
+  headerAudioFrameIdDisplay.updateText(raster);
+};
+
 void updateGraph(
   double (*polynomialArray)[16][16],
   RasterRef raster,

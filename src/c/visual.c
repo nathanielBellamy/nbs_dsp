@@ -16,6 +16,11 @@ void drawHeader(
   char (*header)[16][156],
   char (*raster)[156][156]
 );
+void updateHeader(
+  char (*header)[16][156],
+  char (*raster)[156][156],
+  int audioFrameId
+);
 void updateGraph(
   double (*polynomialArray)[16][16],
   char (*raster)[156][156],
@@ -64,8 +69,8 @@ void *visualMain(void *visualData_)
   char graphNextL[32][64] = {{'L'}};
   char graphNextR[32][64] = {{'R'}};
   
-  double polynomialArrayL[16][16];
-  double polynomialArrayR[16][16];
+  double polynomialArrayL[16][16] = {{ 0.0 }};
+  double polynomialArrayR[16][16] = {{ 0.0 }};
 
   //
   // RENDER
@@ -95,8 +100,6 @@ void *visualMain(void *visualData_)
     } 
     else if (frameCounter >= frameRate - smoothing_i && frameCounter < frameRate) 
     {
-      // int val = atomic_load(visualData->atomicCounter);
-      // printf("\n%d\n", val);
       int frameIndex = frameRate - frameCounter;
 
       // TODO:
@@ -133,23 +136,20 @@ void *visualMain(void *visualData_)
         bufferAtomicEq_avg[i] = total / smoothing_f;
       }
 
+      // prep polynomials to graph
       for (int i = 0; i < 16; i++)
       {
         polynomialArrayL[i][0] = (double) (bufferAtomicEq_avg[i + 1]);
-        for (int j = 1; j < 16; j++)
-        {
-          polynomialArrayL[i][j] = 0;
-        }
       }
 
       for (int i = 0; i < 16; i++)
       {
         polynomialArrayR[i][0] = (double) (bufferAtomicEq_avg[i + 17]);
-        for (int j = 1; j < 16; j++)
-        {
-          polynomialArrayR[i][j] = 0;
-        }
       }
+
+      // prep audioFrameId to display in header
+      int audioFrameId = atomic_load(visualData->atomicCounter);
+      updateHeader(&header, &raster, audioFrameId);
       
       updateGraph(
         &polynomialArrayL,
@@ -168,6 +168,8 @@ void *visualMain(void *visualData_)
         85,
         (void *) &settings
       );
+
+
 
       frameCounter = 0;
     }
