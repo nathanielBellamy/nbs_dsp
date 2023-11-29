@@ -40,10 +40,10 @@ void updateHeader(GraphRefHDR header, RasterRef raster, int audioFrameId)
       0
   );
   
+  std::string frameId = std::to_string(audioFrameId);
 
-  headerAudioFrameIdDisplay.placeString("=== Welcome to NBSDSP-TerminalWAV === ", 2, 2);
-  headerAudioFrameIdDisplay.placeString("=== Glad you could be here === ", 3, 2);
-  headerAudioFrameIdDisplay.placeString("=== Hit ENTER to stop program. ===", 4, 2);
+  headerAudioFrameIdDisplay.placeString("Frame: ", 5, 12);
+  headerAudioFrameIdDisplay.placeString(frameId, 5, 19);
   headerAudioFrameIdDisplay.updateText(raster);
 };
 
