@@ -6,6 +6,7 @@
 #include "../cpp/PolynomialConsoleGraph/src/Settings.h"
 #include "Cli.h"
 #include "GraphRef.h"
+#include "SF_INFO.h"
 
 using namespace std;
 
@@ -15,7 +16,7 @@ void bar()
   Cli::intro();
 };
 
-void drawHeader(void *visualData, GraphRefHDR header, RasterRef raster)
+void drawHeader(void *sfInfo_, GraphRefHDR header, RasterRef raster)
 {
   GraphRef<GraphRefHDR>
   headerTitle(
@@ -24,9 +25,33 @@ void drawHeader(void *visualData, GraphRefHDR header, RasterRef raster)
       0,
       0
   );
-  headerTitle.placeString("=== Welcome to NBSDSP-TerminalWAV === ", 2, 2);
-  headerTitle.placeString("=== Glad you could be here === ", 3, 2);
-  headerTitle.placeString("=== Hit ENTER to stop program. ===", 4, 2);
+  headerTitle.placeString("=== Welcome to NBSDSP-TerminalWAV === ", 2, 12);
+  headerTitle.placeString("=== Glad you could be here === ", 3, 12);
+  headerTitle.placeString("=== Hit ENTER to stop program. ===", 4, 12);
+
+  SF_INFO *sfInfo = (SF_INFO *) sfInfo_;
+
+  int offsetXLabel = 90;
+  int offsetXValue = 110;
+  int offsetYBase = 2;
+
+  string frameCount = std::to_string(sfInfo->frames);
+  headerTitle.placeString("=== Frames: ", offsetYBase, offsetXLabel);
+  headerTitle.placeString(frameCount, offsetYBase, offsetXValue);
+
+  string sampleRate = std::to_string(sfInfo->samplerate);
+  headerTitle.placeString("=== SampleRate: ", offsetYBase + 1, offsetXLabel);
+  headerTitle.placeString(sampleRate, offsetYBase + 1, offsetXValue);
+
+  string channels = std::to_string(sfInfo->channels);
+  headerTitle.placeString("=== Channels: ", offsetYBase + 2, offsetXLabel);
+  headerTitle.placeString(channels, offsetYBase + 2, offsetXValue);
+
+
+  string format = std::to_string(sfInfo->format);
+  headerTitle.placeString("=== Format: ", offsetYBase + 3, offsetXLabel);
+  headerTitle.placeString(format, offsetYBase + 3, offsetXValue);
+
   headerTitle.updateText(raster);
 };
 
@@ -42,8 +67,8 @@ void updateHeader(GraphRefHDR header, RasterRef raster, int audioFrameId)
   
   std::string frameId = std::to_string(audioFrameId);
 
-  headerAudioFrameIdDisplay.placeString("Frame: ", 5, 12);
-  headerAudioFrameIdDisplay.placeString(frameId, 5, 19);
+  headerAudioFrameIdDisplay.placeString("Frame: ", 5, 22);
+  headerAudioFrameIdDisplay.placeString(frameId, 5, 29);
   headerAudioFrameIdDisplay.updateText(raster);
 };
 

@@ -81,7 +81,8 @@ void *visualMain(void *visualData_)
   // printf("\e[?25l");
 
   char header[16][156] = {{ '\0' }};
-  drawHeader((void*) &visualData, &header, &raster);
+  
+  drawHeader((void*) &visualData->audioData->sfinfo, &header, &raster);
 
   // TODO:
   //   -[X] L + R graphs
