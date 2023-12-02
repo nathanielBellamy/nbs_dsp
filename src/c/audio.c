@@ -38,6 +38,10 @@ int init_pa(AUDIO_DATA *audioData, atomic_int *atomicCounter)
   audioData->buffer_frames = 32;
   audioData->buffer_frames_d2p1 = 17;
 
+  // https://svn.ict.usc.edu/svn_vh_public/trunk/lib/vhcl/libsndfile/doc/api.html
+  // > When opening a file for read, the format field should be set to zero before calling sf_open().
+  audioData->sfinfo.format = 0;
+
   if (! (audioData->file = sf_open("test-piano.wav", SFM_READ, &audioData->sfinfo)))
   {
 		printf ("Not able to open input file.\n") ;
