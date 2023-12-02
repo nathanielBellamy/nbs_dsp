@@ -11,6 +11,16 @@
 #include "../cpp/extern_c.h"
 
 // extern_c.h
+void drawBorder(
+  char (*raster)[156][156],
+  char charVert,
+  char charHoriz,
+  char charCorner,
+  int height,
+  int width,
+  int offsetY,
+  int offsetX
+);
 void drawHeader(
   void* visualData,
   char (*header)[16][156],
@@ -82,6 +92,7 @@ void *visualMain(void *visualData_)
 
   char header[16][156] = {{ '\0' }};
   
+  drawBorder(&raster, '|', '~', '=', 6, 123, 0, 0);
   drawHeader((void*) &visualData->audioData->sfinfo, &header, &raster);
 
   // TODO:

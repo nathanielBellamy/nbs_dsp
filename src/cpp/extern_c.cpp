@@ -16,6 +16,52 @@ void bar()
   Cli::intro();
 };
 
+void drawBorder(
+  char (*raster)[156][156],
+  char charVert,
+  char charHoriz,
+  char charCorner,
+  int height,
+  int width,
+  int offsetY,
+  int offsetX
+)
+{
+  char patch[GR_H_L][GR_W_L];
+  // TODO: bring in <vector.h> ?
+  GraphRef<GraphRefL>
+  border(
+      "border",
+      &patch,
+      offsetY,
+      offsetX
+  );
+
+  // boundary-top-bottom
+  for (int x = offsetX + 2; x < offsetX + width ; x++)
+  {
+    patch[offsetY][x] = charHoriz;
+    patch[offsetY + height][x] = charHoriz;
+  }
+
+  // boundary-left-right
+  for (int y = offsetY + 2; y < offsetY + height; y++)
+  {
+    patch[y][offsetX] = charVert;
+    patch[y][offsetX + width] = charVert;
+  }
+
+  // corners
+  {
+    patch[offsetY][offsetX] = charCorner;
+    patch[offsetY][offsetX + width] = charCorner;
+    patch[offsetY + height][offsetX] = charCorner;
+    patch[offsetY + height][offsetX + width] = charCorner;
+  }
+
+  border.updateText(raster);
+};
+
 void drawHeader(void *sfInfo_, GraphRefHDR header, RasterRef raster)
 {
   GraphRef<GraphRefHDR>

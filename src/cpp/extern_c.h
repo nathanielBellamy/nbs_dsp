@@ -6,6 +6,16 @@ extern "C" {
 #endif
 
 void bar();
+void drawBorder(
+  char (*raster)[156][156],
+  char charVert,
+  char charHoriz,
+  char charCorner,
+  int height,
+  int width,
+  int offsetY,
+  int offsetX
+);
 void drawHeader(
   void *visualData,
   char (*header)[16][156],
