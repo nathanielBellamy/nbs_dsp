@@ -42,7 +42,7 @@ int init_pa(AUDIO_DATA *audioData, atomic_int *atomicCounter)
   // > When opening a file for read, the format field should be set to zero before calling sf_open().
   audioData->sfinfo.format = 0;
 
-  if (! (audioData->file = sf_open("test-piano.wav", SFM_READ, &audioData->sfinfo)))
+  if (! (audioData->file = sf_open("gtfam_mini.wav", SFM_READ, &audioData->sfinfo)))
   {
 		printf ("Not able to open input file.\n") ;
 		/* Print the error message from libsndfile. */
@@ -102,7 +102,7 @@ static int callback(const void *inputBuffer, void *outputBuffer,
   (void) statusFlags;
   AUDIO_DATA *audioData = (AUDIO_DATA *) userData;
   // AUDIO_DATA audioData_initial = *audioData;
-  atomic_fetch_add(audioData->atomicCounter, 1);
+  atomic_fetch_add(audioData->atomicCounter, framesPerBuffer);
 
   if( audioData->buffer == NULL )
   {
@@ -112,7 +112,7 @@ static int callback(const void *inputBuffer, void *outputBuffer,
           *out++ = 0;  /* right - silent */
       }
   }
-  else if (audioData->index > audioData->sfinfo.frames - 1) 
+  else if (audioData->index > audioData->sfinfo.frames * audioData->sfinfo.channels + 1) 
   {
     // audioData->index = 0;
     // return paComplete;
