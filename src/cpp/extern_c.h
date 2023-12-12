@@ -5,9 +5,12 @@
 extern "C" {
 #endif
 
+// must match definition in src/c/visual.h
+#define RASTER_SIDE_LENGTH 156
+
 void bar();
 void drawBorder(
-  char (*raster)[156][156],
+  char (*raster)[RASTER_SIDE_LENGTH][RASTER_SIDE_LENGTH],
   char charVert,
   char charHoriz,
   char charCorner,
@@ -18,17 +21,17 @@ void drawBorder(
 );
 void drawHeader(
   void *visualData,
-  char (*header)[16][156],
-  char (*raster)[156][156]
+  char (*header)[16][RASTER_SIDE_LENGTH],
+  char (*raster)[RASTER_SIDE_LENGTH][RASTER_SIDE_LENGTH]
 );
 void updateHeader(
-  char (*header)[16][156],
-  char (*raster)[156][156],
+  char (*header)[16][RASTER_SIDE_LENGTH],
+  char (*raster)[RASTER_SIDE_LENGTH][RASTER_SIDE_LENGTH],
   int audioFrameId
 );
 void updateGraph(
   double (*polynomialArray)[16][16],
-  char (*raster)[156][156],
+  char (*raster)[RASTER_SIDE_LENGTH][RASTER_SIDE_LENGTH],
   char (*graphNext)[32][64],
   int offsetX,
   int offsetY,

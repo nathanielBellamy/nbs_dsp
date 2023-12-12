@@ -9,15 +9,13 @@
 #define GR_W_M 64
 #define GR_W_L 128
 
-#define RASTER_H 156
-#define RASTER_W 156
-
-typedef char (*RasterRef)[RASTER_H][RASTER_W];
+// RASTER_SIDE_LENGTH defined in extern_c.h
+typedef char (*RasterRef)[RASTER_SIDE_LENGTH][RASTER_SIDE_LENGTH];
 
 typedef char (*GraphRefS)[GR_H_S][GR_W_S];
 typedef char (*GraphRefM)[GR_H_M][GR_W_M];
 typedef char (*GraphRefL)[GR_H_L][GR_W_L];
-typedef char (*GraphRefHDR)[GR_H_S][RASTER_W];
+typedef char (*GraphRefHDR)[GR_H_S][RASTER_SIDE_LENGTH];
 
 // TODO:
 //  - turn on/off printing char
@@ -32,7 +30,7 @@ void updateGraphPriv(RasterRef raster, T patch, int offsetY, int offsetX, int he
         int col = j + offsetX; // in raster
         char patchChar = (*patch)[i][j];
         // printf("\n patchChar[%i][%i]: %c", i, j, patchChar);
-        if (row > RASTER_H || col > RASTER_W || patchChar == '\0')
+        if (row > RASTER_SIDE_LENGTH || col > RASTER_SIDE_LENGTH || patchChar == '\0')
         {
           // do nothing
         }
@@ -76,7 +74,7 @@ void updateTextPriv(RasterRef raster, T patch, int offsetY, int offsetX, int hei
         int col = j + offsetX; // in raster
         char patchChar = (*patch)[i][j];
         // printf("\n patchChar[%i][%i]: %c", i, j, patchChar);
-        if (row > RASTER_H || col > RASTER_W || patchChar == '\0')
+        if (row > RASTER_SIDE_LENGTH || col > RASTER_SIDE_LENGTH || patchChar == '\0')
         {
           // do nothing
         }
@@ -258,6 +256,42 @@ public:
 };
 
 template <>
+class GraphRef<RasterRef> {
+private:
+    GraphRefL patch;
+    int offsetX;
+    int offsetY;
+    int height;
+    int width;
+
+public:
+    string name;
+    GraphRef(string name, RasterRef patch, int offsetY, int offsetX)
+      : name(name)
+      , patch(patch)
+      , offsetX(offsetX)
+      , offsetY(offsetY)
+      , height(RASTER_SIDE_LENGTH)
+      , width(RASTER_SIDE_LENGTH) 
+      {};
+
+    void placeString(string input, int innerOffsetY, int innerOffsetX) // string, row, col
+    { // offset string within patch
+      placeStringPriv<GraphRefL>(input, patch, innerOffsetY, innerOffsetX, height, width);
+    };
+
+    void updateGraph(RasterRef raster)
+    {
+      updateGraphPriv<RasterRef>(raster, patch, offsetY, offsetX, height, width);
+    };
+
+    void updateText(RasterRef raster)
+    {
+      updateTextPriv<RasterRef>(raster, patch, offsetY, offsetX, height, width);
+    };
+};
+
+template <>
 class GraphRef<GraphRefHDR> {
 private:
     GraphRefHDR patch;
@@ -274,7 +308,7 @@ public:
       , offsetX(offsetX)
       , offsetY(offsetY)
       , height(GR_H_S)
-      , width(RASTER_W) 
+      , width(RASTER_SIDE_LENGTH) 
       {};
 
     void placeString(string input, int innerOffsetY, int innerOffsetX) // string, row, col

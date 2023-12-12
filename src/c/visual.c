@@ -12,7 +12,7 @@
 
 // extern_c.h
 void drawBorder(
-  char (*raster)[156][156],
+  char (*raster)[RASTER_SIDE_LENGTH][RASTER_SIDE_LENGTH],
   char charVert,
   char charHoriz,
   char charCorner,
@@ -23,17 +23,17 @@ void drawBorder(
 );
 void drawHeader(
   void* visualData,
-  char (*header)[16][156],
-  char (*raster)[156][156]
+  char (*header)[16][RASTER_SIDE_LENGTH],
+  char (*raster)[RASTER_SIDE_LENGTH][RASTER_SIDE_LENGTH]
 );
 void updateHeader(
-  char (*header)[16][156],
-  char (*raster)[156][156],
+  char (*header)[16][RASTER_SIDE_LENGTH],
+  char (*raster)[RASTER_SIDE_LENGTH][RASTER_SIDE_LENGTH],
   int audioFrameId
 );
 void updateGraph(
   double (*polynomialArray)[16][16],
-  char (*raster)[156][156],
+  char (*raster)[RASTER_SIDE_LENGTH][RASTER_SIDE_LENGTH],
   char (*graphNext)[32][64],
   int offsetX,
   int offsetY,
@@ -45,11 +45,11 @@ double stepHeight(void* settings);
 
 void *visualMain(void *visualData_) 
 {
-  int frameRate = 1250000; // 11560000;
+  int frameRate = 1250000; // 1RASTER_SIDE_LENGTH0000;
   int frameCounter = 0;
 
-  float smoothing_f = 1156.0;
-  int smoothing_i = 1156;
+  float smoothing_f = 128.0;
+  int smoothing_i = 128;
 
   VISUAL_DATA *visualData = (VISUAL_DATA *) visualData_;
   int bufferAtomicEq[smoothing_i][2 * visualData->buffer_frames_d2p1];
@@ -74,7 +74,7 @@ void *visualMain(void *visualData_)
   settings.stepHeight = stepHeight((void *) &settings);
   settings.xStepCount = xStepCount((void *) &settings);
 
-  char raster[156][156] = {{'\0'}};
+  char raster[RASTER_SIDE_LENGTH][RASTER_SIDE_LENGTH] = {{'\0'}};
 
   char graphNextL[32][64] = {{'L'}};
   char graphNextR[32][64] = {{'R'}};
@@ -90,9 +90,9 @@ void *visualMain(void *visualData_)
   // hide cursor
   // printf("\e[?25l");
 
-  char header[16][156] = {{ '\0' }};
+  char header[16][RASTER_SIDE_LENGTH] = {{ '\0' }};
   
-  drawBorder(&raster, '|', '~', '=', 6, 123, 0, 0);
+  drawBorder(&raster, '|', '~', '=', 6, 156, 0, 0);
   drawHeader((void*) &visualData->audioData->sfinfo, &header, &raster);
 
   // TODO:
@@ -168,7 +168,7 @@ void *visualMain(void *visualData_)
         &raster,
         &graphNextL,
         7,
-        10,
+        5,
         (void *) &settings
       );
 
@@ -177,7 +177,7 @@ void *visualMain(void *visualData_)
         &raster,
         &graphNextR,
         7,
-        85,
+        80,
         (void *) &settings
       );
 

@@ -17,7 +17,7 @@ void bar()
 };
 
 void drawBorder(
-  char (*raster)[156][156],
+  char (*raster)[RASTER_SIDE_LENGTH][RASTER_SIDE_LENGTH],
   char charVert,
   char charHoriz,
   char charCorner,
@@ -27,9 +27,9 @@ void drawBorder(
   int offsetX
 )
 {
-  char patch[GR_H_L][GR_W_L];
+  char patch[RASTER_SIDE_LENGTH][RASTER_SIDE_LENGTH];
   // TODO: bring in <vector.h> ?
-  GraphRef<GraphRefL>
+  GraphRef<RasterRef>
   border(
       "border",
       &patch,
