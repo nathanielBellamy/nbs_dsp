@@ -31,9 +31,10 @@ void freeAudioData(AUDIO_DATA *audioData) {
   // printf("\nDone.");
 };
 
-int init_pa(AUDIO_DATA *audioData, atomic_int *atomicCounter)
+int init_pa(AUDIO_DATA *audioData, atomic_int *atomicCounter, atomic_int *debugDisplayFlag)
 {
   audioData->atomicCounter = atomicCounter;
+  audioData->debugDisplayFlag = debugDisplayFlag;
   audioData->index = 0;
   audioData->buffer_frames = 32;
   audioData->buffer_frames_d2p1 = 17;
@@ -147,6 +148,7 @@ static int callback(const void *inputBuffer, void *outputBuffer,
         int im_i = (int) floor( 1000 * im );
 
         int power = re_i * re_i + im_i * im_i;
+        atomic_store(audioData->debugDisplayFlag, 7);
         // int sqrt = (int) floor( 100.0 *  power );
 
         atomic_store(

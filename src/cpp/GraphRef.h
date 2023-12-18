@@ -258,7 +258,7 @@ public:
 template <>
 class GraphRef<RasterRef> {
 private:
-    GraphRefL patch;
+    RasterRef patch;
     int offsetX;
     int offsetY;
     int height;
@@ -277,7 +277,7 @@ public:
 
     void placeString(string input, int innerOffsetY, int innerOffsetX) // string, row, col
     { // offset string within patch
-      placeStringPriv<GraphRefL>(input, patch, innerOffsetY, innerOffsetX, height, width);
+      placeStringPriv<RasterRef>(input, patch, innerOffsetY, innerOffsetX, height, width);
     };
 
     void updateGraph(RasterRef raster)

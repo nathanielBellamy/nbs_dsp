@@ -5,6 +5,7 @@
 
 typedef struct {
     atomic_int *atomicCounter;
+    atomic_int *debugDisplayFlag;
     atomic_int *atomicEQ;
     int buffer_frames;
     int buffer_frames_d2p1;

@@ -101,7 +101,7 @@ void drawHeader(void *sfInfo_, GraphRefHDR header, RasterRef raster)
   headerTitle.updateText(raster);
 };
 
-void updateHeader(GraphRefHDR header, RasterRef raster, int audioFrameId)
+void updateHeader(GraphRefHDR header, RasterRef raster, int audioFrameId, int debugDisplayFlag)
 {
   GraphRef<GraphRefHDR>
   headerAudioFrameIdDisplay(
@@ -112,9 +112,13 @@ void updateHeader(GraphRefHDR header, RasterRef raster, int audioFrameId)
   );
   
   std::string frameId = std::to_string(audioFrameId);
+  std::string debugFlag = std::to_string(debugDisplayFlag);
 
   headerAudioFrameIdDisplay.placeString("Frame: ", 5, 22);
   headerAudioFrameIdDisplay.placeString(frameId, 5, 29);
+
+  headerAudioFrameIdDisplay.placeString("Debug: ", 5, 45);
+  headerAudioFrameIdDisplay.placeString(debugFlag, 5, 58);
   headerAudioFrameIdDisplay.updateText(raster);
 };
 

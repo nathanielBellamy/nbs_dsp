@@ -10,8 +10,8 @@
 #include "visual.h"
 #include "visual_data.h"
 
-// pa.h
-int init_pa(AUDIO_DATA *audioData, atomic_int *atomicCounter);
+// audio.h
+int init_pa(AUDIO_DATA *audioData, atomic_int *atomicCounter, atomic_int *debugDisplayFlag);
 void freeAudioData(AUDIO_DATA *audioData);
 void *audioMain(void *audioData);
 
@@ -27,8 +27,9 @@ int main(void) {
   
   // init data
   atomic_int atomicCounter = ATOMIC_VAR_INIT(0);
+  atomic_int debugDisplayFlag = ATOMIC_VAR_INIT(0);
   AUDIO_DATA audioData;
-  if ( init_pa(&audioData, &atomicCounter) != 0)
+  if ( init_pa(&audioData, &atomicCounter, &debugDisplayFlag) != 0)
   {
     freeAudioData(&audioData);
     return 1;
@@ -65,6 +66,7 @@ int main(void) {
 
   VISUAL_DATA visualData;
   visualData.atomicCounter = &atomicCounter;
+  visualData.debugDisplayFlag = &debugDisplayFlag;
   visualData.atomicEQ = atomicEQ;
   // TODO: simplify visualData
   visualData.buffer_frames = audioData.buffer_frames;

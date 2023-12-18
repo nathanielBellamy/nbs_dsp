@@ -29,7 +29,8 @@ void drawHeader(
 void updateHeader(
   char (*header)[16][RASTER_SIDE_LENGTH],
   char (*raster)[RASTER_SIDE_LENGTH][RASTER_SIDE_LENGTH],
-  int audioFrameId
+  int audioFrameId,
+  int debugDisplayFlag
 );
 void updateGraph(
   double (*polynomialArray)[16][16],
@@ -161,7 +162,8 @@ void *visualMain(void *visualData_)
 
       // prep audioFrameId to display in header
       int audioFrameId = atomic_load(visualData->atomicCounter);
-      updateHeader(&header, &raster, audioFrameId);
+      int debugDisplayFlag = atomic_load(visualData->debugDisplayFlag);
+      updateHeader(&header, &raster, audioFrameId, debugDisplayFlag);
       
       updateGraph(
         &polynomialArrayL,
