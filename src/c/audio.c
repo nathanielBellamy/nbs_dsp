@@ -85,9 +85,14 @@ int init_pa(AUDIO_DATA *audioData, atomic_int *atomicCounter, atomic_int *debugD
   return 0;
 }
 
-// TODO: debug the math here
-int magnitude(fftwf_complex* z) {
-    return (int) floor(1000000 * sqrt(4)); // sqrt(z[0]*z[0] + z[1]*z[1]));
+float magnitude(fftwf_complex* z) 
+{
+    return sqrt( z[0]*z[0] + z[1]*z[1] );
+}
+
+int floatToInt(float x)
+{
+  return (int) floor( 1000 * x );
 }
 
 static int callback(const void *inputBuffer, void *outputBuffer,
@@ -139,22 +144,11 @@ static int callback(const void *inputBuffer, void *outputBuffer,
       fftwf_execute(audioData->fft_plan_to_freq);
       
       // share data with visual thread
-      for (i = 0; i < audioData->buffer_frames_d2p1; i++)
+      for (i = 0; i < audioData->buffer_frames_d2p1 - 1; i++)
       {
-        fftwf_complex z = audioData->fft_freq[i];
-        float re = (&z)[0];
-        float im = (&z)[1];
-        int re_i = (int) floor( 1000 * re );
-        int im_i = (int) floor( 1000 * im );
-
-        int power = re_i * re_i + im_i * im_i;
-        atomic_store(audioData->debugDisplayFlag, 7);
-        // int sqrt = (int) floor( 100.0 *  power );
-
         atomic_store(
           audioData->atomicEQ + ( i + ( ch * audioData->buffer_frames_d2p1 ) ), 
-          // magnitude(&audioData->fft_freq[i])
-          power
+          floatToInt( magnitude( audioData->fft_freq + i ) )
         );
       }
 

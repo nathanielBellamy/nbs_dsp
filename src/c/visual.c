@@ -115,26 +115,27 @@ void *visualMain(void *visualData_)
     {
       int frameIndex = frameRate - frameCounter;
 
-      // TODO:
-      //   - maxMag should be per channel
-      int maxPower = 1;
-      for (int ch = 0; ch < 2; ch++)
+      int maxMag[2] = { 1 };
+      for (int i = 0; i < visualData->buffer_frames_d2p1; i++)
       {
-        for (int i = 0; i < visualData->buffer_frames_d2p1; i++)
+        for (int ch = 0; ch < 2; ch++)
         {
           int index = i + (ch * visualData->buffer_frames_d2p1);
           bufferAtomicEq[frameIndex][index] = atomic_load(visualData->atomicEQ + index); // load ith atomic EQ
-          if ( bufferAtomicEq[frameIndex][index] > maxPower  && i < 18)
+          if ( bufferAtomicEq[frameIndex][index] > maxMag[ch] )
           {
-            maxPower = bufferAtomicEq[frameIndex][index];
+            maxMag[ch] = bufferAtomicEq[frameIndex][index];
           }
         }
       }
-      float maxMag = sqrt( (float) maxPower );
 
-      for (int i = 0; i < 2 * visualData->buffer_frames_d2p1; i++)
+      for (int i = 0; i < visualData->buffer_frames_d2p1; i++)
       {
-        bufferAtomicEq_norm[frameIndex][i] = (float) 64.0 * sqrtf( bufferAtomicEq[frameIndex][i] ) / maxMag;
+        for (int ch = 0; ch < 2; ch++)
+        {
+          int index = i + (ch * visualData->buffer_frames_d2p1);
+          bufferAtomicEq_norm[frameIndex][index] = (float) bufferAtomicEq[frameIndex][index] / (1000 * maxMag[ch]);
+        }
       }
     }
     else if ( frameCounter == frameRate ) 
