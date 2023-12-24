@@ -28,7 +28,8 @@ void updateHeader(
   char (*header)[16][RASTER_SIDE_LENGTH],
   char (*raster)[RASTER_SIDE_LENGTH][RASTER_SIDE_LENGTH],
   int audioFrameId,
-  int debugDisplayFlag
+  int debugDisplayFlag,
+  float debugValf
 );
 void updateGraph(
   double (*polynomialArray)[16][16],

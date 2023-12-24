@@ -30,7 +30,8 @@ void updateHeader(
   char (*header)[16][RASTER_SIDE_LENGTH],
   char (*raster)[RASTER_SIDE_LENGTH][RASTER_SIDE_LENGTH],
   int audioFrameId,
-  int debugDisplayFlag
+  int debugDisplayFlag,
+  float debugValf
 );
 void updateGraph(
   double (*polynomialArray)[16][16],
@@ -44,6 +45,13 @@ int xStepCount(void* settings);
 double stepWidth(void* settings);
 double stepHeight(void* settings);
 
+float loadAtomicEq(VISUAL_DATA* visualData, int index)
+{
+  // values are shared between threads as atomic_ints
+  // we convert them back and forth from floats using a factor of 1000.0
+  return ((float) atomic_load(visualData->atomicEQ + index)) / 1000.0;
+}
+
 void *visualMain(void *visualData_) 
 {
   int frameRate = 1250000; // 1RASTER_SIDE_LENGTH0000;
@@ -53,7 +61,7 @@ void *visualMain(void *visualData_)
   int smoothing_i = 128;
 
   VISUAL_DATA *visualData = (VISUAL_DATA *) visualData_;
-  int bufferAtomicEq[smoothing_i][2 * visualData->buffer_frames_d2p1];
+  float bufferAtomicEq[smoothing_i][2 * visualData->buffer_frames_d2p1];
   float bufferAtomicEq_norm[smoothing_i][2 * visualData->buffer_frames_d2p1];
   float bufferAtomicEq_avg[2 * visualData->buffer_frames_d2p1];
 
@@ -66,8 +74,8 @@ void *visualMain(void *visualData_)
 	settings.yAxisChar = '|';
 	settings.xMin = -1.3;
 	settings.xMax = 1.3;
-	settings.yMin = 0.0;
-	settings.yMax = 1.0;
+	settings.yMin = -10.0;
+	settings.yMax = 100.0;
 	settings.epsilon = 0.05;
   settings.displayWidth = 64;
   settings.displayHeight = 32;
@@ -113,18 +121,26 @@ void *visualMain(void *visualData_)
     } 
     else if (frameCounter >= frameRate - smoothing_i && frameCounter < frameRate) 
     {
+
+      // TODO: 
+        // - rework smoothing
+        // - smoothing shouldn't average many values
+        // - it should sample values
+        // - and use PCG to start moving toward new value from old inbetween taking samples
       int frameIndex = frameRate - frameCounter;
 
-      int maxMag[2] = { 1 };
+      float maxMag[2] = { 0 };
       for (int i = 0; i < visualData->buffer_frames_d2p1; i++)
       {
         for (int ch = 0; ch < 2; ch++)
         {
           int index = i + (ch * visualData->buffer_frames_d2p1);
-          bufferAtomicEq[frameIndex][index] = atomic_load(visualData->atomicEQ + index); // load ith atomic EQ
+          
+          bufferAtomicEq[frameIndex][index] = loadAtomicEq(visualData, index);// load ith atomic EQ
           if ( bufferAtomicEq[frameIndex][index] > maxMag[ch] )
           {
             maxMag[ch] = bufferAtomicEq[frameIndex][index];
+            atomic_store(visualData->debugDisplayFlag, maxMag[ch]);
           }
         }
       }
@@ -134,7 +150,7 @@ void *visualMain(void *visualData_)
         for (int ch = 0; ch < 2; ch++)
         {
           int index = i + (ch * visualData->buffer_frames_d2p1);
-          bufferAtomicEq_norm[frameIndex][index] = (float) bufferAtomicEq[frameIndex][index] / (1000 * maxMag[ch]);
+          bufferAtomicEq_norm[frameIndex][index] = bufferAtomicEq[frameIndex][index] / maxMag[ch];
         }
       }
     }
@@ -163,8 +179,8 @@ void *visualMain(void *visualData_)
 
       // prep audioFrameId to display in header
       int audioFrameId = atomic_load(visualData->atomicCounter);
-      int debugDisplayFlag = atomic_load(visualData->debugDisplayFlag);
-      updateHeader(&header, &raster, audioFrameId, debugDisplayFlag);
+      int debugDisplayFlag = floor(polynomialArrayL[2][0]) ;// atomic_load(visualData->debugDisplayFlag);
+      updateHeader(&header, &raster, audioFrameId, debugDisplayFlag, bufferAtomicEq[2][19]);
       
       updateGraph(
         &polynomialArrayL,
