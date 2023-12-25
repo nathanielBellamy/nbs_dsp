@@ -145,7 +145,7 @@ void updateGraph(
   settings = static_cast<Settings*>(settingsIn);
 
 	double image[64] = { 0 };
-	Compute::piecewsieImage(polynomialArray, &image, settings);
+	Compute::piecewiseImage(polynomialArray, &image, settings);
 
   for (int i = 0; i < 32; i++) // row
   {
@@ -186,5 +186,5 @@ double stepHeight(void *settingsIn)
 {
   Settings *settings;
   settings = static_cast<Settings*>(settingsIn);
-  return Compute::stepWidth(settings);
+  return Compute::stepHeight(settings);
 };

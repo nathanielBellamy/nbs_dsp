@@ -139,7 +139,7 @@ static int callback(const void *inputBuffer, void *outputBuffer,
       fftwf_execute(audioData->fft_plan_to_freq);
       
       // share data with visual thread
-      for (i = 0; i < audioData->buffer_frames_d2p1 - 1; i++)
+      for (i = 0; i < audioData->buffer_frames_d2p1; i++)
       {
         atomic_store(
           audioData->atomicEQ + ( i + ( ch * audioData->buffer_frames_d2p1 ) ), 

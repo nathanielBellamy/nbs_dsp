@@ -45,15 +45,8 @@ int xStepCount(void* settings);
 double stepWidth(void* settings);
 double stepHeight(void* settings);
 
-int loadAtomicEq(VISUAL_DATA* visualData, int index)
-{
-  // values are shared between threads as atomic_ints
-  // we convert them back and forth from floats using a factor of 1000.0
-  return atomic_load(visualData->atomicEQ + index);
-}
-
-#define FRAME_RATE 1250000 // how frequently we render
-#define LOAD_RATE 1250000  // how frequently we load EQ data from the audio thread
+#define FRAME_RATE 12500000 // how frequently we render
+#define LOAD_RATE 12500000  // how frequently we load EQ data from the audio thread
 
 void *visualMain(void *visualData_) 
 {
@@ -89,7 +82,7 @@ void *visualMain(void *visualData_)
 	settings.xMax = 1.3;
 	settings.yMin = -0.0;
 	settings.yMax = 1.0;
-	settings.epsilon = 0.05;
+	settings.epsilon = 0.01;
   settings.displayWidth = 64;
   settings.displayHeight = 32;
   settings.stepWidth = stepWidth((void *) &settings);
@@ -152,11 +145,11 @@ void *visualMain(void *visualData_)
         {
           int index = i + (ch * visualData->buffer_frames_d2p1);
           int loadedVal = atomic_load(visualData->atomicEQ + ( index ) );
-          if (loadedVal > 0 && loadedVal < 1000)
+          if ( loadedVal > 0 && loadedVal < 1000000 )
           {
             bufferAtomicEq_load[index] = loadedVal;
           }
-          if ( loadedVal >= maxMag[ch] && loadedVal > 0 && loadedVal < 10000 )
+          if ( loadedVal >= maxMag[ch] && loadedVal > 0 )
           {
             maxMag[ch] = bufferAtomicEq_load[index];
           }
@@ -173,7 +166,6 @@ void *visualMain(void *visualData_)
           bufferAtomicEq_targ[index] = (bufferAtomicEq_load[index]) / ((double)maxMag[ch]);
           debug.int_ = bufferAtomicEq_load[3];
           debug.float_ = (float) maxMag[0];
-          debug.double_ = bufferAtomicEq_targ[3];
         }
       }
 
