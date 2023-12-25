@@ -45,8 +45,8 @@ int xStepCount(void* settings);
 double stepWidth(void* settings);
 double stepHeight(void* settings);
 
-#define FRAME_RATE 12500000 // how frequently we render
-#define LOAD_RATE 12500000  // how frequently we load EQ data from the audio thread
+#define FRAME_RATE 125 // how frequently we render
+#define LOAD_RATE 99999  // how frequently we load EQ data from the audio thread
 
 void *visualMain(void *visualData_) 
 {
@@ -60,16 +60,16 @@ void *visualMain(void *visualData_)
 
   VISUAL_DATA *visualData = (VISUAL_DATA *) visualData_;
   // NOTE:
-  // - values are loaded from the visual thread into bufferAtomicEq_targ
+  // - values are loaded from the visual thread into bufferAtomicEq_next
   // - they are then normalized in place
-  // - on loops when new values are not fetched, the values in bufferAtomicEq_curr
-  //   are incrementally shifted index-wise toward the values in bufferAtomicEq_targ
+  // - on loops when new values are not fetched, the values in bufferAtomicEq_last
+  //   are incrementally shifted index-wise toward the values in bufferAtomicEq_next
   //   in a straight-line homotopy
   //
   // 34 = 2 * audioData->buffer_frames_d2p1
   int bufferAtomicEq_load[34] = { 0.0 };
-  double bufferAtomicEq_targ[34] = { 0.0 };
-  float bufferAtomicEq_curr[34] = { 0.0 };
+  double bufferAtomicEq_next[34] = { 0.0 };
+  double bufferAtomicEq_last[34] = { 0.0 };
 
   // TODO:
   // - get and update settings from user
@@ -80,8 +80,8 @@ void *visualMain(void *visualData_)
 	settings.yAxisChar = '|';
 	settings.xMin = -1.3;
 	settings.xMax = 1.3;
-	settings.yMin = -0.0;
-	settings.yMax = 1.0;
+	settings.yMin = 0.0;
+	settings.yMax = 1.2;
 	settings.epsilon = 0.01;
   settings.displayWidth = 64;
   settings.displayHeight = 32;
@@ -145,7 +145,7 @@ void *visualMain(void *visualData_)
         {
           int index = i + (ch * visualData->buffer_frames_d2p1);
           int loadedVal = atomic_load(visualData->atomicEQ + ( index ) );
-          if ( loadedVal > 0 && loadedVal < 1000000 )
+          if ( loadedVal > 0 && loadedVal < 1000 )
           {
             bufferAtomicEq_load[index] = loadedVal;
           }
@@ -163,33 +163,31 @@ void *visualMain(void *visualData_)
         for (int ch = 0; ch < 2; ch++)
         {
           int index = i + (ch * visualData->buffer_frames_d2p1);
-          bufferAtomicEq_targ[index] = (bufferAtomicEq_load[index]) / ((double)maxMag[ch]);
-          debug.int_ = bufferAtomicEq_load[3];
-          debug.float_ = (float) maxMag[0];
+          bufferAtomicEq_next[index] = (double)bufferAtomicEq_load[index] / maxMag[ch];
         }
       }
 
-      
       loadCounter = 0;
     }
     
     if ( frameCounter == FRAME_RATE )
     {
-      smoothing_t += 1;
-
-      // float t = (float) smoothing_t / (float) FRAME_RATE;
+      
+      debug.int_ = loadCounter;
+      double t = (double)loadCounter / LOAD_RATE;
+      debug.double_ = t;
 
       // prep polynomials to graph
       for (int i = 0; i < 16; i++)
       {
-        // polynomialArrayL[i][0] = (1.0 - t) * bufferAtomicEq_curr[i + 1] + t * bufferAtomicEq_targ[i + 1];
-        polynomialArrayL[i][0] = bufferAtomicEq_targ[i + 1];
+        double val = (t) * bufferAtomicEq_next[i + 1];
+        polynomialArrayL[i][0] = val;
       }
 
       for (int i = 0; i < 16; i++)
       {
-        // polynomialArrayR[i][0] = (1.0 - t) * bufferAtomicEq_curr[i + 17] + t * bufferAtomicEq_targ[i + 17];
-        polynomialArrayR[i][0] = bufferAtomicEq_targ[i + 17];
+        double val = (t) * bufferAtomicEq_next[i + 17];
+        polynomialArrayR[i][0] = val;
       }
 
       // prep audioFrameId to display in header

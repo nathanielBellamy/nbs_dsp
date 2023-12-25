@@ -143,7 +143,7 @@ static int callback(const void *inputBuffer, void *outputBuffer,
       {
         atomic_store(
           audioData->atomicEQ + ( i + ( ch * audioData->buffer_frames_d2p1 ) ), 
-          magnitude( audioData->fft_freq + i ) * 1000.0 // - atomic_store truncates the double to form an int here
+          magnitude( audioData->fft_freq + i ) * 100.0 // - atomic_store truncates the double to form an int here
                                                         //   we multiply by 1000.0 here
                                                         //   we will normalize these values by the largest amongst them
                                                         //   so this factor will cancel out
