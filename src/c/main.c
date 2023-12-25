@@ -11,7 +11,7 @@
 #include "visual_data.h"
 
 // audio.h
-int init_pa(AUDIO_DATA *audioData, atomic_int *atomicCounter, atomic_int *debugDisplayFlag);
+int init_pa(AUDIO_DATA *audioData, atomic_int *atomicCounter, atomic_int *debugInt);
 void freeAudioData(AUDIO_DATA *audioData);
 void *audioMain(void *audioData);
 
@@ -27,9 +27,9 @@ int main(void) {
   
   // init data
   atomic_int atomicCounter = ATOMIC_VAR_INIT(0);
-  atomic_int debugDisplayFlag = ATOMIC_VAR_INIT(0);
+  atomic_int debugInt = ATOMIC_VAR_INIT(0);
   AUDIO_DATA audioData;
-  if ( init_pa(&audioData, &atomicCounter, &debugDisplayFlag) != 0)
+  if ( init_pa(&audioData, &atomicCounter, &debugInt) != 0)
   {
     freeAudioData(&audioData);
     return 1;
@@ -43,7 +43,7 @@ int main(void) {
   // - We process N=audioData.buffer_frames samples per pa_callback
   // - that gives us N/2 bands of EQ per channel
   // - given that we have two channels, we have N EQ values to share between threads
-  atomicEQ = (atomic_int *) malloc(2 * audioData.buffer_frames_d2p1 * sizeof(atomic_int));
+  atomicEQ = (atomic_int *) malloc( 2 * audioData.buffer_frames_d2p1 * sizeof( atomic_int ) );
   for (int i = 0; i < 2 * audioData.buffer_frames_d2p1; i++)
   {
     atomicEQ[i] = ATOMIC_VAR_INIT(0);
@@ -66,7 +66,7 @@ int main(void) {
 
   VISUAL_DATA visualData;
   visualData.atomicCounter = &atomicCounter;
-  visualData.debugDisplayFlag = &debugDisplayFlag;
+  visualData.debugInt = &debugInt;
   visualData.atomicEQ = atomicEQ;
   // TODO: simplify visualData
   visualData.buffer_frames = audioData.buffer_frames;

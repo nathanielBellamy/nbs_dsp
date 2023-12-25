@@ -5,6 +5,7 @@
 #include <math.h>
 #include <pthread.h>
 #include <unistd.h>
+#include "dbg.h"
 #include "settings.h"
 #include "visual.h"
 #include "visual_data.h"
@@ -30,8 +31,7 @@ void updateHeader(
   char (*header)[16][RASTER_SIDE_LENGTH],
   char (*raster)[RASTER_SIDE_LENGTH][RASTER_SIDE_LENGTH],
   int audioFrameId,
-  int debugDisplayFlag,
-  float debugValf
+  DBG* debug
 );
 void updateGraph(
   double (*polynomialArray)[16][16],
@@ -45,25 +45,38 @@ int xStepCount(void* settings);
 double stepWidth(void* settings);
 double stepHeight(void* settings);
 
-float loadAtomicEq(VISUAL_DATA* visualData, int index)
+int loadAtomicEq(VISUAL_DATA* visualData, int index)
 {
   // values are shared between threads as atomic_ints
   // we convert them back and forth from floats using a factor of 1000.0
-  return ((float) atomic_load(visualData->atomicEQ + index)) / 1000.0;
+  return atomic_load(visualData->atomicEQ + index);
 }
+
+#define FRAME_RATE 1250000 // how frequently we render
+#define LOAD_RATE 1250000  // how frequently we load EQ data from the audio thread
 
 void *visualMain(void *visualData_) 
 {
-  int frameRate = 1250000; // 1RASTER_SIDE_LENGTH0000;
-  int frameCounter = 0;
+  DBG debug;
 
-  float smoothing_f = 128.0;
-  int smoothing_i = 128;
+  //setup STARe
+  int frameCounter = -1; // we eager increment so this makes 0 is first value used by loop
+  int loadCounter = -1;
+
+  int smoothing_t = -1;
 
   VISUAL_DATA *visualData = (VISUAL_DATA *) visualData_;
-  float bufferAtomicEq[smoothing_i][2 * visualData->buffer_frames_d2p1];
-  float bufferAtomicEq_norm[smoothing_i][2 * visualData->buffer_frames_d2p1];
-  float bufferAtomicEq_avg[2 * visualData->buffer_frames_d2p1];
+  // NOTE:
+  // - values are loaded from the visual thread into bufferAtomicEq_targ
+  // - they are then normalized in place
+  // - on loops when new values are not fetched, the values in bufferAtomicEq_curr
+  //   are incrementally shifted index-wise toward the values in bufferAtomicEq_targ
+  //   in a straight-line homotopy
+  //
+  // 34 = 2 * audioData->buffer_frames_d2p1
+  int bufferAtomicEq_load[34] = { 0.0 };
+  double bufferAtomicEq_targ[34] = { 0.0 };
+  float bufferAtomicEq_curr[34] = { 0.0 };
 
   // TODO:
   // - get and update settings from user
@@ -74,8 +87,8 @@ void *visualMain(void *visualData_)
 	settings.yAxisChar = '|';
 	settings.xMin = -1.3;
 	settings.xMax = 1.3;
-	settings.yMin = -10.0;
-	settings.yMax = 100.0;
+	settings.yMin = -0.0;
+	settings.yMax = 1.0;
 	settings.epsilon = 0.05;
   settings.displayWidth = 64;
   settings.displayHeight = 32;
@@ -101,92 +114,101 @@ void *visualMain(void *visualData_)
 
   char header[16][RASTER_SIDE_LENGTH] = {{ '\0' }};
   
-  drawBorder(&raster, '|', '~', '=', 6, 156, 0, 0);
+  drawBorder(&raster, '|', '~', '=', 8, 156, 0, 0);
   drawHeader((void*) &visualData->audioData->sfinfo, &header, &raster);
 
   // TODO:
   //   -[X] L + R graphs
-  //   -[ ] header
+  //   -[X] header
   //   -[ ] footer
-  //   -[ ] border
+  //   -[X] border
   //   -[ ] pick a band
   //   -[ ] increase/decrease boost with up/down keys
 
+
+  // setup END
+  // init playback loop
   while( true )
   {
     frameCounter += 1;
-    if ( frameCounter == frameRate - smoothing_i )
-    {
-      // system("clear");
-    } 
-    else if (frameCounter >= frameRate - smoothing_i && frameCounter < frameRate) 
-    {
+    loadCounter += 1;
 
+    // load EQ data from audio thread
+    if (loadCounter == LOAD_RATE) 
+    {
       // TODO: 
         // - rework smoothing
         // - smoothing shouldn't average many values
         // - it should sample values
         // - and use PCG to start moving toward new value from old inbetween taking samples
-      int frameIndex = frameRate - frameCounter;
+      int maxMag[2] = { 1 }; // - each time we load we need to normalize 
+                               //   all values by the max value for that channel
+        //
 
-      float maxMag[2] = { 0 };
+        // load data from visual thread
       for (int i = 0; i < visualData->buffer_frames_d2p1; i++)
       {
         for (int ch = 0; ch < 2; ch++)
         {
           int index = i + (ch * visualData->buffer_frames_d2p1);
-          
-          bufferAtomicEq[frameIndex][index] = loadAtomicEq(visualData, index);// load ith atomic EQ
-          if ( bufferAtomicEq[frameIndex][index] > maxMag[ch] )
+          int loadedVal = atomic_load(visualData->atomicEQ + ( index ) );
+          if (loadedVal > 0 && loadedVal < 1000)
           {
-            maxMag[ch] = bufferAtomicEq[frameIndex][index];
-            atomic_store(visualData->debugDisplayFlag, maxMag[ch]);
+            bufferAtomicEq_load[index] = loadedVal;
+          }
+          if ( loadedVal >= maxMag[ch] && loadedVal > 0 && loadedVal < 10000 )
+          {
+            maxMag[ch] = bufferAtomicEq_load[index];
           }
         }
       }
 
+
+      // normalize loaded data while copying into render target array
       for (int i = 0; i < visualData->buffer_frames_d2p1; i++)
       {
         for (int ch = 0; ch < 2; ch++)
         {
           int index = i + (ch * visualData->buffer_frames_d2p1);
-          bufferAtomicEq_norm[frameIndex][index] = bufferAtomicEq[frameIndex][index] / maxMag[ch];
+          bufferAtomicEq_targ[index] = (bufferAtomicEq_load[index]) / ((double)maxMag[ch]);
+          debug.int_ = bufferAtomicEq_load[3];
+          debug.float_ = (float) maxMag[0];
+          debug.double_ = bufferAtomicEq_targ[3];
         }
       }
+
+      
+      loadCounter = 0;
     }
-    else if ( frameCounter == frameRate ) 
+    
+    if ( frameCounter == FRAME_RATE )
     {
-      for (int i = 0; i < 2 * visualData->buffer_frames_d2p1; i++)
-      {
-        float total = 0.0;
-        for (int j = 0; j < smoothing_i; j++)
-        {
-          total += bufferAtomicEq_norm[j][i];
-        }
-        bufferAtomicEq_avg[i] = total / smoothing_f;
-      }
+      smoothing_t += 1;
+
+      // float t = (float) smoothing_t / (float) FRAME_RATE;
 
       // prep polynomials to graph
       for (int i = 0; i < 16; i++)
       {
-        polynomialArrayL[i][0] = (double) (bufferAtomicEq_avg[i + 1]);
+        // polynomialArrayL[i][0] = (1.0 - t) * bufferAtomicEq_curr[i + 1] + t * bufferAtomicEq_targ[i + 1];
+        polynomialArrayL[i][0] = bufferAtomicEq_targ[i + 1];
       }
 
       for (int i = 0; i < 16; i++)
       {
-        polynomialArrayR[i][0] = (double) (bufferAtomicEq_avg[i + 17]);
+        // polynomialArrayR[i][0] = (1.0 - t) * bufferAtomicEq_curr[i + 17] + t * bufferAtomicEq_targ[i + 17];
+        polynomialArrayR[i][0] = bufferAtomicEq_targ[i + 17];
       }
 
       // prep audioFrameId to display in header
       int audioFrameId = atomic_load(visualData->atomicCounter);
-      int debugDisplayFlag = floor(polynomialArrayL[2][0]) ;// atomic_load(visualData->debugDisplayFlag);
-      updateHeader(&header, &raster, audioFrameId, debugDisplayFlag, bufferAtomicEq[2][19]);
-      
+      updateHeader(&header, &raster, audioFrameId, &debug);
+
       updateGraph(
         &polynomialArrayL,
         &raster,
         &graphNextL,
-        7,
+        12,
         5,
         (void *) &settings
       );
@@ -195,12 +217,10 @@ void *visualMain(void *visualData_)
         &polynomialArrayR,
         &raster,
         &graphNextR,
-        7,
+        12,
         80,
         (void *) &settings
       );
-
-
 
       frameCounter = 0;
     }

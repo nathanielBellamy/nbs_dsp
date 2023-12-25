@@ -7,7 +7,7 @@
 typedef struct {
     // to be accessed by visual thread
     atomic_int *atomicCounter;
-    atomic_int *debugDisplayFlag;
+    atomic_int *debugInt;
     atomic_int *atomicEQ;
 
     // for portaudio only

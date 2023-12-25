@@ -7,7 +7,7 @@
 #include "audio_data.h"
 
 void freeAudioData(AUDIO_DATA *paData);
-int init_pa(AUDIO_DATA *paData, atomic_int *atomicCounter, atomic_int *debugDisplayFlag);
+int init_pa(AUDIO_DATA *paData, atomic_int *atomicCounter, atomic_int *debugInt);
 void *audioMain(void *paData);
 
 #endif

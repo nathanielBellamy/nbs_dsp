@@ -31,10 +31,10 @@ void freeAudioData(AUDIO_DATA *audioData) {
   // printf("\nDone.");
 };
 
-int init_pa(AUDIO_DATA *audioData, atomic_int *atomicCounter, atomic_int *debugDisplayFlag)
+int init_pa(AUDIO_DATA *audioData, atomic_int *atomicCounter, atomic_int *debugInt)
 {
   audioData->atomicCounter = atomicCounter;
-  audioData->debugDisplayFlag = debugDisplayFlag;
+  audioData->debugInt = debugInt;
   audioData->index = 0;
   audioData->buffer_frames = 32;
   audioData->buffer_frames_d2p1 = 17;
@@ -43,7 +43,7 @@ int init_pa(AUDIO_DATA *audioData, atomic_int *atomicCounter, atomic_int *debugD
   // > When opening a file for read, the format field should be set to zero before calling sf_open().
   audioData->sfinfo.format = 0;
 
-  if (! (audioData->file = sf_open("gtfam_mini.wav", SFM_READ, &audioData->sfinfo)))
+  if (! (audioData->file = sf_open("test-piano.wav", SFM_READ, &audioData->sfinfo)))
   {
 		printf ("Not able to open input file.\n") ;
 		/* Print the error message from libsndfile. */
@@ -85,14 +85,9 @@ int init_pa(AUDIO_DATA *audioData, atomic_int *atomicCounter, atomic_int *debugD
   return 0;
 }
 
-float magnitude(fftwf_complex* z) 
+double magnitude(fftwf_complex* z) 
 {
     return sqrt( z[0]*z[0] + z[1]*z[1] );
-}
-
-int floatToInt(float x)
-{
-  return (int) floor( 1000 * x );
 }
 
 static int callback(const void *inputBuffer, void *outputBuffer,
@@ -148,7 +143,10 @@ static int callback(const void *inputBuffer, void *outputBuffer,
       {
         atomic_store(
           audioData->atomicEQ + ( i + ( ch * audioData->buffer_frames_d2p1 ) ), 
-          floatToInt( magnitude( audioData->fft_freq + i ) )
+          magnitude( audioData->fft_freq + i ) * 1000.0 // - atomic_store truncates the double to form an int here
+                                                        //   we multiply by 1000.0 here
+                                                        //   we will normalize these values by the largest amongst them
+                                                        //   so this factor will cancel out
         );
       }
 

@@ -101,7 +101,7 @@ void drawHeader(void *sfInfo_, GraphRefHDR header, RasterRef raster)
   headerTitle.updateText(raster);
 };
 
-void updateHeader(GraphRefHDR header, RasterRef raster, int audioFrameId, int debugDisplayFlag, float debugValf)
+void updateHeader(GraphRefHDR header, RasterRef raster, int audioFrameId, DBG* debug)
 {
   GraphRef<GraphRefHDR>
   headerAudioFrameIdDisplay(
@@ -112,13 +112,23 @@ void updateHeader(GraphRefHDR header, RasterRef raster, int audioFrameId, int de
   );
   
   std::string frameId = std::to_string(audioFrameId);
-  std::string debugFlag = std::to_string(debugValf);
+
+  std::string debugDouble = std::to_string(debug->double_);
+  std::string debugInt = std::to_string(debug->int_);
+  std::string debugFloat = std::to_string(debug->float_);
 
   headerAudioFrameIdDisplay.placeString("Frame: ", 5, 22);
   headerAudioFrameIdDisplay.placeString(frameId, 5, 29);
 
-  headerAudioFrameIdDisplay.placeString("Debug: ", 5, 45);
-  headerAudioFrameIdDisplay.placeString(debugFlag, 5, 58);
+  headerAudioFrameIdDisplay.placeString("Debug I: ", 5, 45);
+  headerAudioFrameIdDisplay.placeString(debugInt, 5, 58);
+
+  headerAudioFrameIdDisplay.placeString("Debug F: ", 6, 45);
+  headerAudioFrameIdDisplay.placeString(debugFloat, 6, 58);
+ 
+  headerAudioFrameIdDisplay.placeString("Debug D: ", 7, 45);
+  headerAudioFrameIdDisplay.placeString(debugDouble, 7, 58);
+
   headerAudioFrameIdDisplay.updateText(raster);
 };
 

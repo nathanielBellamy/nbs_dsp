@@ -7,6 +7,7 @@ extern "C" {
 
 // must match definition in src/c/visual.h
 #define RASTER_SIDE_LENGTH 156
+#include"../c/dbg.h"
 
 void bar();
 void drawBorder(
@@ -28,8 +29,7 @@ void updateHeader(
   char (*header)[16][RASTER_SIDE_LENGTH],
   char (*raster)[RASTER_SIDE_LENGTH][RASTER_SIDE_LENGTH],
   int audioFrameId,
-  int debugDisplayFlag,
-  float debugValf
+  DBG* debug
 );
 void updateGraph(
   double (*polynomialArray)[16][16],
