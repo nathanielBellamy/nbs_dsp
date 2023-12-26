@@ -81,7 +81,7 @@ void *visualMain(void *visualData_)
 	settings.xMin = -1.3;
 	settings.xMax = 1.3;
 	settings.yMin = 0.0;
-	settings.yMax = 1.2;
+	settings.yMax = 1.3;
 	settings.epsilon = 0.01;
   settings.displayWidth = 64;
   settings.displayHeight = 32;
@@ -180,13 +180,13 @@ void *visualMain(void *visualData_)
       // prep polynomials to graph
       for (int i = 0; i < 16; i++)
       {
-        double val = (t) * bufferAtomicEq_next[i + 1];
+        double val = (1.0 - t) * bufferAtomicEq_next[i + 1]; // fall towards 0 inbetween loads
         polynomialArrayL[i][0] = val;
       }
 
       for (int i = 0; i < 16; i++)
       {
-        double val = (t) * bufferAtomicEq_next[i + 17];
+        double val = (1.0 - t) * bufferAtomicEq_next[i + 17];
         polynomialArrayR[i][0] = val;
       }
 

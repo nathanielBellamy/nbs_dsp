@@ -43,7 +43,7 @@ int init_pa(AUDIO_DATA *audioData, atomic_int *atomicCounter, atomic_int *debugI
   // > When opening a file for read, the format field should be set to zero before calling sf_open().
   audioData->sfinfo.format = 0;
 
-  if (! (audioData->file = sf_open("test-piano.wav", SFM_READ, &audioData->sfinfo)))
+  if (! (audioData->file = sf_open("clr.wav", SFM_READ, &audioData->sfinfo)))
   {
 		printf ("Not able to open input file.\n") ;
 		/* Print the error message from libsndfile. */
@@ -143,9 +143,10 @@ static int callback(const void *inputBuffer, void *outputBuffer,
       {
         atomic_store(
           audioData->atomicEQ + ( i + ( ch * audioData->buffer_frames_d2p1 ) ), 
-          magnitude( audioData->fft_freq + i ) * 100.0 // - atomic_store truncates the double to form an int here
-                                                        //   we multiply by 1000.0 here
-                                                        //   we will normalize these values by the largest amongst them
+          magnitude( audioData->fft_freq + i ) * 10000.0 // - atomic_store truncates the double to form an int here
+                                                        //   we multiply by a factor here to maintain data
+                                                        //   when the float is truncated to an int
+                                                        //   but we will normalize these values by the largest amongst them
                                                         //   so this factor will cancel out
         );
       }

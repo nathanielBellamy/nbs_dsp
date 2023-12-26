@@ -42,7 +42,7 @@ void updateGraphPriv(RasterRef raster, T patch, int offsetY, int offsetX, int he
             // Set bg-color to cyan
             printf("\e[48;5;12m");
           }
-          else if (patchChar == 'o')
+          else if (patchChar == 'o') // 'o' for over-graph
           {
             // Set bg-color to light blue
             printf("\e[48;5;25m");
