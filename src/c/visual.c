@@ -157,7 +157,7 @@ void *visualMain(void *visualData_)
           double res = (double)bufferAtomicEq_load[index] / maxMag[ch];
           if ( res > 1.0 )
           {
-            bufferAtomicEq_next[index] = 1.0;
+            bufferAtomicEq_next[index] = 0.0;
           }
           else if ( res < 0.0 )
           {
