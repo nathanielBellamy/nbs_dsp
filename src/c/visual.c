@@ -46,7 +46,7 @@ double stepWidth(void* settings);
 double stepHeight(void* settings);
 
 #define FRAME_RATE 125 // how frequently we render
-#define LOAD_RATE 99999  // how frequently we load EQ data from the audio thread
+#define LOAD_RATE 222222  // how frequently we load EQ data from the audio thread
 
 void *visualMain(void *visualData_) 
 {
@@ -62,14 +62,12 @@ void *visualMain(void *visualData_)
   // NOTE:
   // - values are loaded from the visual thread into bufferAtomicEq_next
   // - they are then normalized in place
-  // - on loops when new values are not fetched, the values in bufferAtomicEq_last
-  //   are incrementally shifted index-wise toward the values in bufferAtomicEq_next
-  //   in a straight-line homotopy
+  // - on loops when new values are not fetched, the values in bufferAtomicEq_next
+  //   are incrementally shifted index-wise toward 0 values in a straight-line homotopy
   //
   // 34 = 2 * audioData->buffer_frames_d2p1
   int bufferAtomicEq_load[34] = { 0.0 };
   double bufferAtomicEq_next[34] = { 0.0 };
-  double bufferAtomicEq_last[34] = { 0.0 };
 
   // TODO:
   // - get and update settings from user
@@ -127,18 +125,19 @@ void *visualMain(void *visualData_)
     loadCounter += 1;
 
     // load EQ data from audio thread
-    if (loadCounter == LOAD_RATE) 
+    int eqSync = atomic_load( visualData->atomicEqSync );
+    debug.int_ = eqSync;
+    if ( loadCounter > LOAD_RATE && eqSync == 0 ) 
     {
       // TODO: 
         // - rework smoothing
         // - smoothing shouldn't average many values
         // - it should sample values
         // - and use PCG to start moving toward new value from old inbetween taking samples
-      int maxMag[2] = { 1 }; // - each time we load we need to normalize 
-                               //   all values by the max value for that channel
-        //
+      int maxMag[2] = { 10000 }; // - each time we load we need to normalize 
+                                 //   all values by the max value for that channel
 
-        // load data from visual thread
+      // load data from visual thread
       for (int i = 0; i < visualData->buffer_frames_d2p1; i++)
       {
         for (int ch = 0; ch < 2; ch++)
@@ -156,7 +155,6 @@ void *visualMain(void *visualData_)
         }
       }
 
-
       // normalize loaded data while copying into render target array
       for (int i = 0; i < visualData->buffer_frames_d2p1; i++)
       {
@@ -168,26 +166,29 @@ void *visualMain(void *visualData_)
       }
 
       loadCounter = 0;
+      atomic_store(
+        visualData->atomicEqSync,
+        1
+      );
     }
     
     if ( frameCounter == FRAME_RATE )
     {
       
-      debug.int_ = loadCounter;
       double t = (double)loadCounter / LOAD_RATE;
       debug.double_ = t;
 
       // prep polynomials to graph
       for (int i = 0; i < 16; i++)
       {
-        double val = (1.0 - t) * bufferAtomicEq_next[i + 1]; // fall towards 0 inbetween loads
-        polynomialArrayL[i][0] = val;
+        double val = (1.0 - 0.8 * t) * bufferAtomicEq_next[i + 0]; // fall towards 0 inbetween loads
+        polynomialArrayL[16-i-1][0] = val;
       }
 
       for (int i = 0; i < 16; i++)
       {
-        double val = (1.0 - t) * bufferAtomicEq_next[i + 17];
-        polynomialArrayR[i][0] = val;
+        double val = (1.0 - 0.8 * t) * bufferAtomicEq_next[i + 16];
+        polynomialArrayR[16-i-1][0] = val;
       }
 
       // prep audioFrameId to display in header

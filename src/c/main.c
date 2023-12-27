@@ -36,7 +36,9 @@ int main(void) {
   };
   // NOTE:
   // - atomicEQ consists of N=audioData.buffer_frames atomic_ints in contiguous memeory
-  // - we do not assume synchronization to be maintained across atomic values (aka. this is not an atomic_array)
+  // - we use the atomicEqSync variable to ensure reading and writing is executed when
+  //   all values in atomicEQ come from a single application of the DFT
+  atomic_int atomicEqSync = ATOMIC_VAR_INIT(1);
   atomic_int* atomicEQ;
   // NOTE:
   // - This assumes stereo - aka two channels
@@ -48,6 +50,7 @@ int main(void) {
   {
     atomicEQ[i] = ATOMIC_VAR_INIT(0);
   }
+  audioData.atomicEqSync = &atomicEqSync;
   audioData.atomicEQ = atomicEQ;
 
   // init threads
@@ -67,6 +70,7 @@ int main(void) {
   VISUAL_DATA visualData;
   visualData.atomicCounter = &atomicCounter;
   visualData.debugInt = &debugInt;
+  visualData.atomicEqSync = &atomicEqSync;
   visualData.atomicEQ = atomicEQ;
   // TODO: simplify visualData
   visualData.buffer_frames = audioData.buffer_frames;

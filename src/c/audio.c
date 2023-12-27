@@ -137,18 +137,38 @@ static int callback(const void *inputBuffer, void *outputBuffer,
 
       // compute fft
       fftwf_execute(audioData->fft_plan_to_freq);
+
+      // - we control neither when nor how frequently this method is called
+      //   and we cannot perform any blocking operations here (ie. no mutexs)
+      // - so we need a method of ensuring that, when the visual thread loads the values
+      //   in atomicEQ, it loads values from a single application of the DFT
+      // - we use the atomicEqSync variable to achieve this
       
-      // share data with visual thread
-      for (i = 0; i < audioData->buffer_frames_d2p1; i++)
-      {
-        atomic_store(
-          audioData->atomicEQ + ( i + ( ch * audioData->buffer_frames_d2p1 ) ), 
-          magnitude( audioData->fft_freq + i ) * 10000.0 // - atomic_store truncates the double to form an int here
-                                                        //   we multiply by a factor here to maintain data
-                                                        //   when the float is truncated to an int
-                                                        //   but we will normalize these values by the largest amongst them
-                                                        //   so this factor will cancel out
-        );
+      int eqSync = atomic_load( audioData->atomicEqSync );
+      if ( eqSync == 1 )
+      { // visual thread is ready to receive data
+        // share data with visual thread
+        for (i = 0; i < audioData->buffer_frames_d2p1; i++)
+        {
+          atomic_store(
+            audioData->atomicEQ + ( i + ( ch * audioData->buffer_frames_d2p1 ) ), 
+            magnitude( audioData->fft_freq + i ) * 10000.0 // - atomic_store truncates the double to form an int here
+                                                          //   we multiply by a factor here to maintain data
+                                                          //   when the float is truncated to an int
+                                                          //   but we will normalize these values by the largest amongst them
+                                                          //   so this factor will cancel out
+          );
+        }
+        
+        // - disable write
+        // - visual thread will enable when ready
+        if ( ch == 1 )
+        {
+          atomic_store(
+            audioData->atomicEqSync,
+            0
+          );
+        }
       }
 
       // transform back into time domain

@@ -9,6 +9,7 @@ typedef struct {
     atomic_int *atomicCounter;
     atomic_int *debugInt;
     atomic_int *atomicEQ;
+    atomic_int *atomicEqSync;
 
     // for portaudio only
     SNDFILE *file;
