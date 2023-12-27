@@ -43,7 +43,7 @@ int init_pa(AUDIO_DATA *audioData, atomic_int *atomicCounter, atomic_int *debugI
   // > When opening a file for read, the format field should be set to zero before calling sf_open().
   audioData->sfinfo.format = 0;
 
-  if (! (audioData->file = sf_open("clr.wav", SFM_READ, &audioData->sfinfo)))
+  if (! (audioData->file = sf_open("gtfam_mini.wav", SFM_READ, &audioData->sfinfo)))
   {
 		printf ("Not able to open input file.\n") ;
 		/* Print the error message from libsndfile. */

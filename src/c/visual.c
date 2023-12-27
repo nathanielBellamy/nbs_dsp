@@ -56,8 +56,6 @@ void *visualMain(void *visualData_)
   int frameCounter = -1; // we eager increment so this makes 0 is first value used by loop
   int loadCounter = -1;
 
-  int smoothing_t = -1;
-
   VISUAL_DATA *visualData = (VISUAL_DATA *) visualData_;
   // NOTE:
   // - values are loaded from the visual thread into bufferAtomicEq_next
@@ -79,7 +77,7 @@ void *visualMain(void *visualData_)
 	settings.xMin = -1.3;
 	settings.xMax = 1.3;
 	settings.yMin = 0.0;
-	settings.yMax = 1.3;
+	settings.yMax = 1.1;
 	settings.epsilon = 0.01;
   settings.displayWidth = 64;
   settings.displayHeight = 32;
@@ -129,11 +127,6 @@ void *visualMain(void *visualData_)
     debug.int_ = eqSync;
     if ( loadCounter > LOAD_RATE && eqSync == 0 ) 
     {
-      // TODO: 
-        // - rework smoothing
-        // - smoothing shouldn't average many values
-        // - it should sample values
-        // - and use PCG to start moving toward new value from old inbetween taking samples
       int maxMag[2] = { 10000 }; // - each time we load we need to normalize 
                                  //   all values by the max value for that channel
 
@@ -161,7 +154,19 @@ void *visualMain(void *visualData_)
         for (int ch = 0; ch < 2; ch++)
         {
           int index = i + (ch * visualData->buffer_frames_d2p1);
-          bufferAtomicEq_next[index] = (double)bufferAtomicEq_load[index] / maxMag[ch];
+          double res = (double)bufferAtomicEq_load[index] / maxMag[ch];
+          if ( res > 1.0 )
+          {
+            bufferAtomicEq_next[index] = 1.0;
+          }
+          else if ( res < 0.0 )
+          {
+            bufferAtomicEq_next[index] = 0.0;
+          }
+          else
+          {
+            bufferAtomicEq_next[index] = res;
+          }
         }
       }
 
@@ -199,7 +204,7 @@ void *visualMain(void *visualData_)
         &polynomialArrayL,
         &raster,
         &graphNextL,
-        12,
+        11,
         5,
         (void *) &settings
       );
@@ -208,7 +213,7 @@ void *visualMain(void *visualData_)
         &polynomialArrayR,
         &raster,
         &graphNextR,
-        12,
+        11,
         80,
         (void *) &settings
       );
