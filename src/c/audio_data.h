@@ -1,17 +1,24 @@
-#ifndef PA_DATA_H
-#define PA_DATA_H
+#ifndef AUDIO_DATA_H
+#define AUDIO_DATA_H
+#include <stdatomic.h>
 #include <sndfile.h>
 #include <fftw3.h>
 
-// TODO: 
-//  fftw_plan fftwPlan
-//  float *fftwOutBuffer
 typedef struct {
+    // to be accessed by visual thread
+    atomic_int *atomicCounter;
+    atomic_int *debugInt;
+    atomic_int *atomicEQ;
+    atomic_int *atomicEqSync;
+
+    // for portaudio only
     SNDFILE *file;
     SF_INFO sfinfo;
     float *buffer;
     sf_count_t index;
     sf_count_t buffer_frames; // frames processed per callback invocation
+    sf_count_t buffer_frames_d2p1; // buffer_frames over 2, plus 1
+                                   // this is the number of non-redundant complex numbers in fft_freq 
   //
   //
   // NOTE: 
@@ -36,6 +43,6 @@ typedef struct {
   //             paData.fft_time --copy into indices mod channel count (interwoven)--> 
   //              paData.fft_buffer --copy-->
   //                pa_out                
-} PA_DATA;
+} AUDIO_DATA;
 
 #endif

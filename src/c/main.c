@@ -1,94 +1,112 @@
 #include <stdio.h>
+#include <stdatomic.h>
+#include <pthread.h>
 #include <stdlib.h>
-#include <sndfile.h>
 #include <fftw3.h>
-#include "pa.h"
-#include "pa_data.h"
-#include "../cpp/foo.h"
+#include "audio.h"
+#include "audio_data.h"
+#include "visual.h"
+#include "../cpp/extern_c.h"
+#include "visual.h"
+#include "visual_data.h"
 
-// pa.h
-int pa(PA_DATA *paData);
+// audio.h
+int init_pa(AUDIO_DATA *audioData, atomic_int *atomicCounter, atomic_int *debugInt);
+void freeAudioData(AUDIO_DATA *audioData);
+void *audioMain(void *audioData);
 
-void freePaData(PA_DATA *paData);
-void freePaData(PA_DATA *paData) {
-  printf("\nCleaning up resources...");
-  
-  free(paData->buffer);
-  fftwf_free(paData->fft_buffer);
-  fftwf_free(paData->fft_time);
-  fftwf_free(paData->fft_freq);
-  fftwf_destroy_plan(paData->fft_plan_to_freq);
-  fftwf_destroy_plan(paData->fft_plan_to_time);
-  sf_close(paData->file);
-  
-  printf("\nDone.");
-};
+// visual.h
+void *visualMain(void *foo);
 
-// ../cpp/foo.h
+// ../cpp/extern_c.h
 void bar(void);
 
 int main(void);
 int main(void) {
-  bar();
+  // bar();
   
-  PA_DATA paData;
-  paData.index = 0;
-  paData.buffer_frames = 32;
-  printf("\npa_idx_start: %lli", paData.index);
-
-  if (! (paData.file = sf_open("gtfam_mini.wav", SFM_READ, &paData.sfinfo)))
+  // init data
+  atomic_int atomicCounter = ATOMIC_VAR_INIT(0);
+  atomic_int debugInt = ATOMIC_VAR_INIT(0);
+  AUDIO_DATA audioData;
+  if ( init_pa(&audioData, &atomicCounter, &debugInt) != 0)
   {
-		printf ("Not able to open input file.\n") ;
-		/* Print the error message from libsndfile. */
-		puts (sf_strerror (NULL)) ;
-    return 1 ;
+    freeAudioData(&audioData);
+    return 1;
   };
-  
-  // Display some information about the file.
-  printf("\nSample rate: %d", paData.sfinfo.samplerate);
-  printf("\nChannels: %d", paData.sfinfo.channels);
-  printf("\nFrames: %lli", paData.sfinfo.frames);
-  
-  // Allocate memory for data
-  paData.buffer = (float *) malloc(paData.sfinfo.frames * paData.sfinfo.channels * sizeof(float));
-  if (!paData.buffer) {
-      printf("\nCannot allocate memory");
-      return 1;
-  }
-
-  // Read the audio data into buffer
-  long readcount = sf_read_float(paData.file, paData.buffer, paData.sfinfo.frames * paData.sfinfo.channels);
-  
-  printf("\nreadcount: %ld", readcount);
-
-  // allocate memory to compute fast fourier transform in pa_callback
-  paData.fft_buffer = (float*) fftwf_malloc(sizeof(float) * paData.buffer_frames * paData.sfinfo.channels);
-  paData.fft_time = (float*) fftwf_malloc(sizeof(float) * paData.buffer_frames);
-  paData.fft_freq = (fftwf_complex*) fftwf_malloc(sizeof(fftwf_complex) * paData.buffer_frames);
-  paData.fft_plan_to_freq = fftwf_plan_dft_r2c_1d(
-    paData.buffer_frames, 
-    paData.fft_time,
-    paData.fft_freq, 
-    FFTW_ESTIMATE
-  );
-  paData.fft_plan_to_time = fftwf_plan_dft_c2r_1d(
-    paData.buffer_frames, 
-    paData.fft_freq, 
-    paData.fft_time,
-    FFTW_ESTIMATE
-  );
-
-  if ( pa(&paData) != 0 )
+  // NOTE:
+  // - atomicEQ consists of N=audioData.buffer_frames atomic_ints in contiguous memeory
+  // - we use the atomicEqSync variable to ensure reading and writing is executed when
+  //   all values in atomicEQ come from a single application of the DFT
+  atomic_int atomicEqSync = ATOMIC_VAR_INIT(1);
+  atomic_int* atomicEQ;
+  // NOTE:
+  // - This assumes stereo - aka two channels
+  // - We process N=audioData.buffer_frames samples per pa_callback
+  // - that gives us N/2 bands of EQ per channel
+  // - given that we have two channels, we have N EQ values to share between threads
+  atomicEQ = (atomic_int *) malloc( 2 * audioData.buffer_frames_d2p1 * sizeof( atomic_int ) );
+  for (int i = 0; i < 2 * audioData.buffer_frames_d2p1; i++)
   {
-    // Log error
-    printf("\nportaudio encountered an error.");
-    
-    // Cleanup
-    freePaData(&paData);
+    atomicEQ[i] = ATOMIC_VAR_INIT(0);
+  }
+  audioData.atomicEqSync = &atomicEqSync;
+  audioData.atomicEQ = atomicEQ;
+
+  // init threads
+  pthread_t thread_audio, thread_visual;
+  int ta_create_err = pthread_create(
+    &thread_audio, 
+    NULL, 
+    audioMain,
+    &audioData
+  );
+  if (ta_create_err)
+  {
+    fprintf(stderr, "\nError - audio pthread_create() return code: %d", ta_create_err);
     return 1;
   }
 
+  VISUAL_DATA visualData;
+  visualData.atomicCounter = &atomicCounter;
+  visualData.debugInt = &debugInt;
+  visualData.atomicEqSync = &atomicEqSync;
+  visualData.atomicEQ = atomicEQ;
+  // TODO: simplify visualData
+  visualData.buffer_frames = audioData.buffer_frames;
+  visualData.buffer_frames_d2p1 = audioData.buffer_frames_d2p1;
+  visualData.audioData = &audioData;
+
+  int tv_create_err = pthread_create(
+    &thread_visual,
+    NULL,
+    visualMain,
+    &visualData
+  );
+  if (tv_create_err)
+  {
+    fprintf(stderr, "\nError - visual pthread_create() return code: %d", ta_create_err);
+    return 1;
+  }
+
+  // cleanup threads
+  //
+  // wait for audio thread to finish
+  int ta_join_err = pthread_join(thread_audio, NULL);
+  if ( ta_join_err )
+  {
+    fprintf(stderr, "\nError - audio pthread_join() return code: %d", ta_join_err);
+  }
+
+  // cancel visual thread
+  int tv_cancel_err = pthread_cancel(thread_visual);
+  if ( tv_cancel_err )
+  {
+    fprintf(stderr, "\nError - visual pthread_join() return code: %d", tv_cancel_err);
+  }
+
   // Cleanup
-  freePaData(&paData);
+  freeAudioData(&audioData);
+  free(atomicEQ);
   return 0;
 }
