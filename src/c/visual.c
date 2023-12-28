@@ -55,7 +55,7 @@ double fallFunction(double t)
 }
 
 #define FRAME_RATE 125 // how frequently we render
-#define READ_RATE 191111  // how frequently we read EQ data written by audio thread
+#define READ_RATE 101111  // how frequently we read EQ data written by audio thread
 
 void *visualMain(void *visualData_) 
 {
@@ -136,7 +136,7 @@ void *visualMain(void *visualData_)
     debug.int_ = eqSync;
     if ( readCounter > READ_RATE && eqSync == 0 ) 
     {
-      int maxMag[2] = { 10000 }; // - each time we load we need to normalize 
+      int maxMag[2] = { 1 }; // - each time we load we need to normalize 
                                  //   all values by the max value for that channel
 
       // load data from visual thread
@@ -145,14 +145,19 @@ void *visualMain(void *visualData_)
         for (int ch = 0; ch < 2; ch++)
         {
           int index = i + (ch * visualData->buffer_frames_d2p1);
-          int loadedVal = atomic_load(visualData->atomicEQ + ( index ) );
-          if ( loadedVal > 0 && loadedVal < 1000 )
+          int loadedVal = atomic_load(visualData->atomicEQ + index );
+          bool validVal = loadedVal > 0 && loadedVal < 1000;
+          if ( validVal )
           {
             bufferAtomicEq_load[index] = loadedVal;
           }
-          if ( loadedVal >= maxMag[ch] && loadedVal > 0 )
+          else 
           {
-            maxMag[ch] = bufferAtomicEq_load[index];
+            bufferAtomicEq_load[index] = 0;
+          }
+          if ( loadedVal >= maxMag[ch] && validVal )
+          {
+            maxMag[ch] = loadedVal;
           }
         }
       }
@@ -164,11 +169,7 @@ void *visualMain(void *visualData_)
         {
           int index = i + (ch * visualData->buffer_frames_d2p1);
           double res = (double)bufferAtomicEq_load[index] / maxMag[ch];
-          if ( res > 1.0 )
-          {
-            bufferAtomicEq_norm[index] = 0.0;
-          }
-          else if ( res < 0.0 )
+          if ( res > 1.0 || res < 0.0)
           {
             bufferAtomicEq_norm[index] = 0.0;
           }
