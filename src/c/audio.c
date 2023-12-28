@@ -147,7 +147,7 @@ static int callback(const void *inputBuffer, void *outputBuffer,
       int eqSync = atomic_load( audioData->atomicEqSync );
       if ( eqSync == 1 )
       { // visual thread is ready to receive data
-        // share data with visual thread
+        // write data to be read by visual thread
         for (i = 0; i < audioData->buffer_frames_d2p1; i++)
         {
           atomic_store(
@@ -162,7 +162,7 @@ static int callback(const void *inputBuffer, void *outputBuffer,
         
         // - disable write
         // - visual thread will enable when ready
-        if ( ch == 1 )
+        if ( ch == 1 ) // write all channels 
         {
           atomic_store(
             audioData->atomicEqSync,
