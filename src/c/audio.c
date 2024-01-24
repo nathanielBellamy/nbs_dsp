@@ -138,6 +138,13 @@ static int callback(const void *inputBuffer, void *outputBuffer,
       // compute fft
       fftwf_execute(audioData->fft_plan_to_freq);
 
+      // filter frequencies
+      // for ( int i = 10; i < 17; i++ ) //audioData->buffer_frames_d2p1; i++ )
+      // {
+      //   fftwf_complex zero = { 0.0, 0.0 };
+      //   audioData->fft_freq[i] = zero;
+      // }
+
       // - we control neither when nor how frequently this method is called
       //   and we cannot perform any blocking operations here (ie. no mutexs)
       // - so we need a method of ensuring that, when the visual thread loads the values
