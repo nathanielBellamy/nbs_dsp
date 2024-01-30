@@ -10,6 +10,7 @@
 #include "visual.h"
 #include "visual_data.h"
 #include "../cpp/extern_c.h"
+#include "../cpp/Constants.h"
 
 // extern_c.h
 void drawBorder(
@@ -34,9 +35,9 @@ void updateHeader(
   DBG* debug
 );
 void updateGraph(
-  double (*polynomialArray)[16][16],
+  double (*polynomialArray)[POLYNOMIAL_ARRAY_LENGTH][POLYNOMIAL_DEGREE_P1],
   char (*raster)[RASTER_SIDE_LENGTH][RASTER_SIDE_LENGTH],
-  char (*graphNext)[32][64],
+  char (*graphNext)[EQ_IMAGE_HEIGHT][EQ_IMAGE_WIDTH],
   int offsetX,
   int offsetY,
   void *settingsIn
@@ -72,9 +73,9 @@ void *visualMain(void *visualData_)
   // - on loops when new values are not fetched, the values in bufferAtomicEq_norm
   //   are incrementally shifted index-wise toward 0 values in a straight-line homotopy
   //
-  // 34 = 2 * audioData->buffer_frames_d2p1
-  int bufferAtomicEq_load[34] = { 0.0 };
-  double bufferAtomicEq_norm[34] = { 0.0 };
+  // 514 = 2 * audioData->buffer_frames_d2p1
+  int bufferAtomicEq_load[514] = { 0.0 };
+  double bufferAtomicEq_norm[514] = { 0.0 };
 
   // TODO:
   // - get and update settings from user
@@ -88,19 +89,20 @@ void *visualMain(void *visualData_)
 	settings.yMin = 0.0;
 	settings.yMax = 1.1;
 	settings.epsilon = 0.01;
-  settings.displayWidth = 64;
-  settings.displayHeight = 32;
+  // TODO: move these off settings?
+  settings.displayWidth = EQ_IMAGE_WIDTH;
+  settings.displayHeight = EQ_IMAGE_WIDTH;
   settings.stepWidth = stepWidth((void *) &settings);
   settings.stepHeight = stepHeight((void *) &settings);
   settings.xStepCount = xStepCount((void *) &settings);
 
   char raster[RASTER_SIDE_LENGTH][RASTER_SIDE_LENGTH] = {{'\0'}};
 
-  char graphNextL[32][64] = {{'L'}};
-  char graphNextR[32][64] = {{'R'}};
+  char graphNextL[EQ_IMAGE_HEIGHT][EQ_IMAGE_WIDTH] = {{'L'}};
+  char graphNextR[EQ_IMAGE_HEIGHT][EQ_IMAGE_WIDTH] = {{'R'}};
   
-  double polynomialArrayL[16][16] = {{ 0.0 }};
-  double polynomialArrayR[16][16] = {{ 0.0 }};
+  double polynomialArrayL[POLYNOMIAL_ARRAY_LENGTH][POLYNOMIAL_DEGREE_P1] = {{ 0.0 }};
+  double polynomialArrayR[POLYNOMIAL_ARRAY_LENGTH][POLYNOMIAL_DEGREE_P1] = {{ 0.0 }};
 
   //
   // RENDER
@@ -194,16 +196,16 @@ void *visualMain(void *visualData_)
       debug.double_ = t;
 
       // prep polynomials to graph
-      for (int i = 0; i < 16; i++)
+      for (int i = 0; i < POLYNOMIAL_ARRAY_LENGTH; i++)
       {
         double val = fallFunction( t ) * bufferAtomicEq_norm[i + 0]; // fall towards 0 inbetween reads
-        polynomialArrayL[16-i-1][0] = val;
+        polynomialArrayL[POLYNOMIAL_ARRAY_LENGTH-i-1][0] = val;
       }
 
-      for (int i = 0; i < 16; i++)
+      for (int i = 0; i < POLYNOMIAL_ARRAY_LENGTH; i++)
       {
-        double val = fallFunction( t ) * bufferAtomicEq_norm[i + 16];
-        polynomialArrayR[16-i-1][0] = val;
+        double val = fallFunction( t ) * bufferAtomicEq_norm[i + 257];
+        polynomialArrayR[POLYNOMIAL_ARRAY_LENGTH-i-1][0] = val;
       }
 
       // prep audioFrameId to display in header
@@ -223,8 +225,8 @@ void *visualMain(void *visualData_)
         &polynomialArrayR,
         &raster,
         &graphNextR,
-        11,
-        80,
+        27,
+        5,
         (void *) &settings
       );
 

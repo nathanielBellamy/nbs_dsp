@@ -10,6 +10,7 @@
 #include <fftw3.h>
 #include "audio.h"
 #include "audio_data.h"
+#include "../cpp/Constants.h"
 
 // following: https://github.com/PortAudio/portaudio/blob/master/examples/pa_fuzz.c
 
@@ -36,8 +37,8 @@ int init_pa(AUDIO_DATA *audioData, atomic_int *atomicCounter, atomic_int *debugI
   audioData->atomicCounter = atomicCounter;
   audioData->debugInt = debugInt;
   audioData->index = 0;
-  audioData->buffer_frames = 32;
-  audioData->buffer_frames_d2p1 = 17;
+  audioData->buffer_frames = 512;
+  audioData->buffer_frames_d2p1 = 257;
 
   // https://svn.ict.usc.edu/svn_vh_public/trunk/lib/vhcl/libsndfile/doc/api.html
   // > When opening a file for read, the format field should be set to zero before calling sf_open().
