@@ -208,6 +208,11 @@ void *visualMain(void *visualData_)
       // prep polynomials to graph
       for (int i = 0; i < POLYNOMIAL_ARRAY_LENGTH; i++)
       {
+        // TODO:
+        // - double localAverage(bufferAtomicEq_norm, i)
+        // - relate POLYNOMIAL_ARRAY_LENGTH to AUDIO_BUFFER_FRAMES_D2P1
+        // - take local average of values to determine val
+
         double val = fallFunction( t ) * bufferAtomicEq_norm[i + 0]; // fall towards 0 inbetween reads
         polynomialArrayL[POLYNOMIAL_ARRAY_LENGTH-i-1][0] = val;
       }
