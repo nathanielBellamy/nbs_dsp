@@ -24,7 +24,7 @@ void bar(void);
 int main(void);
 int main(void) {
   // bar();
-  
+
   // init data
   atomic_int atomicCounter = ATOMIC_VAR_INIT(0);
   atomic_int debugInt = ATOMIC_VAR_INIT(0);
@@ -56,8 +56,8 @@ int main(void) {
   // init threads
   pthread_t thread_audio, thread_visual;
   int ta_create_err = pthread_create(
-    &thread_audio, 
-    NULL, 
+    &thread_audio,
+    NULL,
     audioMain,
     &audioData
   );
@@ -73,8 +73,6 @@ int main(void) {
   visualData.atomicEqSync = &atomicEqSync;
   visualData.atomicEQ = atomicEQ;
   // TODO: simplify visualData
-  visualData.buffer_frames = audioData.buffer_frames;
-  visualData.buffer_frames_d2p1 = audioData.buffer_frames_d2p1;
   visualData.audioData = &audioData;
 
   int tv_create_err = pthread_create(

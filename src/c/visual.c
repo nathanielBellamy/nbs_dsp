@@ -144,11 +144,11 @@ void *visualMain(void *visualData_)
                                  //   all values by the max value for that channel
 
       // load data from audio thread
-      for (int i = 0; i < visualData->buffer_frames_d2p1; i++)
+      for (int i = 0; i < AUDIO_BUFFER_FRAMES_D2P1; i++)
       {
         for (int ch = 0; ch < 2; ch++)
         {
-          int index = i + (ch * visualData->buffer_frames_d2p1);
+          int index = i + (ch * AUDIO_BUFFER_FRAMES_D2P1);
           int loadedVal = atomic_load(visualData->atomicEQ + index );
           bool validVal = loadedVal > 0 && loadedVal < 1000;
           if ( validVal )
@@ -167,11 +167,11 @@ void *visualMain(void *visualData_)
       }
 
       // normalize loaded data while copying into render target array
-      for (int i = 0; i < visualData->buffer_frames_d2p1; i++)
+      for (int i = 0; i < AUDIO_BUFFER_FRAMES_D2P1; i++)
       {
         for (int ch = 0; ch < 2; ch++)
         {
-          int index = i + (ch * visualData->buffer_frames_d2p1);
+          int index = i + (ch * AUDIO_BUFFER_FRAMES_D2P1);
           double res = (double)bufferAtomicEq_load[index] / maxMag[ch];
           if ( res > 1.0 || res < 0.0)
           {
