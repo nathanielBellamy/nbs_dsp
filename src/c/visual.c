@@ -58,7 +58,7 @@ double fallFunction(double t)
 #define FRAME_RATE 125 // how frequently we render
 #define READ_RATE 101111  // how frequently we read EQ data written by audio thread
 
-void *visualMain(void *visualData_) 
+void *visualMain(void *visualData_)
 {
   DBG debug;
 
@@ -67,15 +67,17 @@ void *visualMain(void *visualData_)
   int readCounter = -1;
 
   VISUAL_DATA *visualData = (VISUAL_DATA *) visualData_;
+
+  //
   // NOTE:
   // - values are loaded from the visual thread into bufferAtomicEq_norm
   // - they are then normalized in place
   // - on loops when new values are not fetched, the values in bufferAtomicEq_norm
   //   are incrementally shifted index-wise toward 0 values in a straight-line homotopy
   //
-  // 514 = 2 * audioData->buffer_frames_d2p1
-  int bufferAtomicEq_load[514] = { 0.0 };
-  double bufferAtomicEq_norm[514] = { 0.0 };
+
+  int bufferAtomicEq_load[AUDIO_BUFFER_FRAMES_D2P1_X2] = { 0.0 };
+  double bufferAtomicEq_norm[AUDIO_BUFFER_FRAMES_D2P1_X2] = { 0.0 };
 
   // TODO:
   // - get and update settings from user
@@ -100,20 +102,20 @@ void *visualMain(void *visualData_)
 
   char graphNextL[EQ_IMAGE_HEIGHT][EQ_IMAGE_WIDTH] = {{'L'}};
   char graphNextR[EQ_IMAGE_HEIGHT][EQ_IMAGE_WIDTH] = {{'R'}};
-  
+
   double polynomialArrayL[POLYNOMIAL_ARRAY_LENGTH][POLYNOMIAL_DEGREE_P1] = {{ 0.0 }};
   double polynomialArrayR[POLYNOMIAL_ARRAY_LENGTH][POLYNOMIAL_DEGREE_P1] = {{ 0.0 }};
 
   //
   // RENDER
-  // 
+  //
   system("clear");
 
   // hide cursor
   // printf("\e[?25l");
 
   char header[16][RASTER_SIDE_LENGTH] = {{ '\0' }};
-  
+
   drawBorder(&raster, '|', '~', '=', 8, 156, 0, 0);
   drawHeader((void*) &visualData->audioData->sfinfo, &header, &raster);
 
@@ -130,15 +132,15 @@ void *visualMain(void *visualData_)
   // init playback loop
   while( true )
   {
-    frameCounter += 1;  // counter between renders 
+    frameCounter += 1;  // counter between renders
     readCounter += 1;   // counter between reads
 
     // load EQ data from audio thread
     int eqSync = atomic_load( visualData->atomicEqSync );
     debug.int_ = eqSync;
-    if ( readCounter > READ_RATE && eqSync == 0 ) 
+    if ( readCounter > READ_RATE && eqSync == 0 )
     {
-      int maxMag[2] = { 1 }; // - each time we load we need to normalize 
+      int maxMag[2] = { 1 }; // - each time we load we need to normalize
                                  //   all values by the max value for that channel
 
       // load data from audio thread
@@ -153,7 +155,7 @@ void *visualMain(void *visualData_)
           {
             bufferAtomicEq_load[index] = loadedVal;
           }
-          else 
+          else
           {
             bufferAtomicEq_load[index] = 0;
           }
@@ -196,10 +198,10 @@ void *visualMain(void *visualData_)
       // - So rather than representing individual bands, these polynomials should now represent
       //   average value of a range of elements in the FFT output
       // - this may be a use case for a bump function
-    
+
     if ( frameCounter == FRAME_RATE )
     {
-      
+
       double t = (double)readCounter / READ_RATE;
       debug.double_ = t;
 
@@ -212,7 +214,7 @@ void *visualMain(void *visualData_)
 
       for (int i = 0; i < POLYNOMIAL_ARRAY_LENGTH; i++)
       {
-        double val = fallFunction( t ) * bufferAtomicEq_norm[i + 257];
+        double val = fallFunction( t ) * bufferAtomicEq_norm[i + AUDIO_BUFFER_FRAMES_D2P1];
         polynomialArrayR[POLYNOMIAL_ARRAY_LENGTH-i-1][0] = val;
       }
 
