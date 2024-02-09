@@ -141,7 +141,7 @@ void *visualMain(void *visualData_)
       int maxMag[2] = { 1 }; // - each time we load we need to normalize 
                                  //   all values by the max value for that channel
 
-      // load data from visual thread
+      // load data from audio thread
       for (int i = 0; i < visualData->buffer_frames_d2p1; i++)
       {
         for (int ch = 0; ch < 2; ch++)
@@ -188,6 +188,14 @@ void *visualMain(void *visualData_)
         1
       );
     }
+
+      // TODO:
+      // - in order to reduce noise in the FFT, we have increased the number of samples N
+      //   used to compute it
+      // - but N is now much bigger than the number of Polynomials we'll use in our piecewise graph
+      // - So rather than representing individual bands, these polynomials should now represent
+      //   average value of a range of elements in the FFT output
+      // - this may be a use case for a bump function
     
     if ( frameCounter == FRAME_RATE )
     {
