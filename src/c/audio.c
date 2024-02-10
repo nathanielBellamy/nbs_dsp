@@ -37,8 +37,6 @@ int init_pa(AUDIO_DATA *audioData, atomic_int *atomicCounter, atomic_int *debugI
   audioData->atomicCounter = atomicCounter;
   audioData->debugInt = debugInt;
   audioData->index = 0;
-  audioData->buffer_frames = (sf_count_t) AUDIO_BUFFER_FRAMES;
-  audioData->buffer_frames_d2p1 = (sf_count_t) AUDIO_BUFFER_FRAMES_D2P1;
 
   // https://svn.ict.usc.edu/svn_vh_public/trunk/lib/vhcl/libsndfile/doc/api.html
   // > When opening a file for read, the format field should be set to zero before calling sf_open().
@@ -67,17 +65,17 @@ int init_pa(AUDIO_DATA *audioData, atomic_int *atomicCounter, atomic_int *debugI
   }
 
   // allocate memory to compute fast fourier transform in pa_callback
-  audioData->fft_buffer = (float*) fftwf_malloc(sizeof(float) * audioData->buffer_frames * audioData->sfinfo.channels);
-  audioData->fft_time = (float*) fftwf_malloc(sizeof(float) * audioData->buffer_frames);
-  audioData->fft_freq = (fftwf_complex*) fftwf_malloc(sizeof(fftwf_complex) * audioData->buffer_frames_d2p1);
+  audioData->fft_buffer = (float*) fftwf_malloc(sizeof(float) * AUDIO_BUFFER_FRAMES * audioData->sfinfo.channels);
+  audioData->fft_time = (float*) fftwf_malloc(sizeof(float) * AUDIO_BUFFER_FRAMES);
+  audioData->fft_freq = (fftwf_complex*) fftwf_malloc(sizeof(fftwf_complex) * AUDIO_BUFFER_FRAMES_D2P1);
   audioData->fft_plan_to_freq = fftwf_plan_dft_r2c_1d(
-    audioData->buffer_frames,
+    AUDIO_BUFFER_FRAMES,
     audioData->fft_time,
     audioData->fft_freq,
     FFTW_ESTIMATE
   );
   audioData->fft_plan_to_time = fftwf_plan_dft_c2r_1d(
-    audioData->buffer_frames,
+    AUDIO_BUFFER_FRAMES,
     audioData->fft_freq,
     audioData->fft_time,
     FFTW_ESTIMATE
@@ -156,10 +154,10 @@ static int callback(const void *inputBuffer, void *outputBuffer,
       if ( eqSync == 1 )
       { // visual thread is ready to receive data
         // write data to be read by visual thread
-        for (i = 0; i < audioData->buffer_frames_d2p1; i++)
+        for (i = 0; i < AUDIO_BUFFER_FRAMES_D2P1; i++)
         {
           atomic_store(
-            audioData->atomicEQ + ( i + ( ch * audioData->buffer_frames_d2p1 ) ),
+            audioData->atomicEQ + ( i + ( ch * AUDIO_BUFFER_FRAMES_D2P1) ),
             magnitude( audioData->fft_freq + i ) * 10000.0 // - atomic_store truncates the double to form an int here
                                                           //   we multiply by a factor here to maintain data
                                                           //   when the float is truncated to an int
@@ -235,7 +233,7 @@ void *audioMain(void *audioData_)
             &inputParameters,
             &outputParameters,
             audioData->sfinfo.samplerate,
-            audioData->buffer_frames,
+            AUDIO_BUFFER_FRAMES,
             paNoFlag, /* paClipOn, */
             callback,
             audioData );
