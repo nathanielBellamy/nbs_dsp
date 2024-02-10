@@ -55,6 +55,25 @@ double fallFunction(double t)
   return 2.0 - exp( 0.3 * t );
 }
 
+double
+localAverage(double (*bufferAtomicEq_norm)[AUDIO_BUFFER_FRAMES_D2P1_X2], int idx)
+{
+  double total;
+  total = 0.0;
+
+  int idxStep;
+  idxStep = idx * AUDIO_BUFFER_FRAMES_D2P1_DPAL;
+
+  for (int i = 0; i < AUDIO_BUFFER_FRAMES_D2P1_DPAL; i++)
+  {
+    if (i + idxStep < AUDIO_BUFFER_FRAMES_D2P1_X2)
+    {
+      total += (*bufferAtomicEq_norm)[idxStep + i];
+    }
+  }
+  return total / AUDIO_BUFFER_FRAMES_D2P1_DPAL;
+}
+
 #define FRAME_RATE 125 // how frequently we render
 #define READ_RATE 101111  // how frequently we read EQ data written by audio thread
 
@@ -208,18 +227,13 @@ void *visualMain(void *visualData_)
       // prep polynomials to graph
       for (int i = 0; i < POLYNOMIAL_ARRAY_LENGTH; i++)
       {
-        // TODO:
-        // - double localAverage(bufferAtomicEq_norm, i)
-        // - relate POLYNOMIAL_ARRAY_LENGTH to AUDIO_BUFFER_FRAMES_D2P1
-        // - take local average of values to determine val
-
-        double val = fallFunction( t ) * bufferAtomicEq_norm[i + 0]; // fall towards 0 inbetween reads
+        double val = fallFunction( t ) * localAverage(&bufferAtomicEq_norm, i); // fall towards 0 inbetween reads
         polynomialArrayL[POLYNOMIAL_ARRAY_LENGTH-i-1][0] = val;
       }
 
       for (int i = 0; i < POLYNOMIAL_ARRAY_LENGTH; i++)
       {
-        double val = fallFunction( t ) * bufferAtomicEq_norm[i + AUDIO_BUFFER_FRAMES_D2P1];
+        double val = fallFunction( t ) * localAverage(&bufferAtomicEq_norm, i + POLYNOMIAL_ARRAY_LENGTH);
         polynomialArrayR[POLYNOMIAL_ARRAY_LENGTH-i-1][0] = val;
       }
 
