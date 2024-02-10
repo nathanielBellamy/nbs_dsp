@@ -56,20 +56,17 @@ double fallFunction(double t)
 }
 
 double
-localAverage(double (*bufferAtomicEq_norm)[AUDIO_BUFFER_FRAMES_D2P1_X2], int idx)
+localAverage(double (*bufferAtomicEq_norm)[AUDIO_BUFFER_FRAMES_D2P1_X2], int idx, int ch)
 {
   double total;
   total = 0.0;
 
   int idxStep;
-  idxStep = idx * AUDIO_BUFFER_FRAMES_D2P1_DPAL;
+  idxStep = (idx * AUDIO_BUFFER_FRAMES_D2P1_DPAL) + (ch * AUDIO_BUFFER_FRAMES_D2P1);
 
-  for (int i = 0; i < AUDIO_BUFFER_FRAMES_D2P1_DPAL; i++)
+  for (int i = idxStep; i < idxStep + AUDIO_BUFFER_FRAMES_D2P1_DPAL; i++)
   {
-    if (i + idxStep < AUDIO_BUFFER_FRAMES_D2P1_X2)
-    {
-      total += (*bufferAtomicEq_norm)[idxStep + i];
-    }
+    total += (*bufferAtomicEq_norm)[i];
   }
   return total / AUDIO_BUFFER_FRAMES_D2P1_DPAL;
 }
@@ -227,13 +224,13 @@ void *visualMain(void *visualData_)
       // prep polynomials to graph
       for (int i = 0; i < POLYNOMIAL_ARRAY_LENGTH; i++)
       {
-        double val = fallFunction( t ) * localAverage(&bufferAtomicEq_norm, i); // fall towards 0 inbetween reads
+        double val = fallFunction( t ) * localAverage(&bufferAtomicEq_norm, i, 0); // fall towards 0 inbetween reads
         polynomialArrayL[POLYNOMIAL_ARRAY_LENGTH-i-1][0] = val;
       }
 
       for (int i = 0; i < POLYNOMIAL_ARRAY_LENGTH; i++)
       {
-        double val = fallFunction( t ) * localAverage(&bufferAtomicEq_norm, i + POLYNOMIAL_ARRAY_LENGTH);
+        double val = fallFunction( t ) * localAverage(&bufferAtomicEq_norm, i, 1);
         polynomialArrayR[POLYNOMIAL_ARRAY_LENGTH-i-1][0] = val;
       }
 
