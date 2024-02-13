@@ -12,8 +12,8 @@
 #include "../cpp/extern_c.h"
 #include "../cpp/Constants.h"
 
-#define FRAME_RATE 125 // how frequently we render
-#define READ_RATE 101111  // how frequently we read EQ data written by audio thread
+#define FRAME_RATE     8000  // how frequently we render
+#define READ_RATE   8000000  // how frequently we read EQ data written by audio thread
 
 // extern_c.h
 void drawBorder(
@@ -54,8 +54,7 @@ double fallFunction(double t)
 // inbetween reads of DFT data
 {
   // return (1.0 - 0.8 * t);
-  // return exp(-t);
-  return 2.0 - exp( 0.3 * t );
+  return exp(-t);
 }
 
 double
@@ -69,10 +68,10 @@ localAverage(double (*bufferAtomicEq_norm)[AUDIO_BUFFER_FRAMES_D2P1_X2], int idx
 
   for (int i = idxStep; i < idxStep + AUDIO_BUFFER_FRAMES_D2P1_DPAL; i++)
   {
-    if ( ch == 1)
-    {
-      debug->double_ = (*bufferAtomicEq_norm)[i];
-    }
+    // if ( ch == 1)
+    // {
+    //   debug->double_ = (*bufferAtomicEq_norm)[i];
+    // }
     total += (*bufferAtomicEq_norm)[i];
   }
   return total / AUDIO_BUFFER_FRAMES_D2P1_DPAL;
@@ -210,14 +209,6 @@ void *visualMain(void *visualData_)
         1
       );
     }
-
-      // TODO:
-      // - in order to reduce noise in the FFT, we have increased the number of samples N
-      //   used to compute it
-      // - but N is now much bigger than the number of Polynomials we'll use in our piecewise graph
-      // - So rather than representing individual bands, these polynomials should now represent
-      //   average value of a range of elements in the FFT output
-      // - this may be a use case for a bump function
 
     if ( frameCounter == FRAME_RATE )
     {
