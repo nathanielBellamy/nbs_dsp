@@ -9,10 +9,10 @@ LDFLAGS = -lpthread -lstdc++ -lsndfile -lportaudio -lfftw3f -lm -L/usr/local/lib
 
 # Set the names of your source, object, and executable files
 C_SRC = ./src/c/main.c ./src/c/audio.c ./src/c/visual.c
-HEADER_C = ./src/c/audio.h ./src/c/visual.h
+HEADER_C = ./src/c/audio.h ./src/c/visual.h ./src/c/visual_data.h ./src/c/audio_data.h ./src/c/settings.h ./src/c/dbg.h
 
 CXX_SRC = ./src/cpp/extern_c.cpp ./src/cpp/Cli.cpp ./src/cpp/PolynomialConsoleGraph/src/Compute.cpp ./src/cpp/PolynomialConsoleGraph/src/Draw.cpp ./src/cpp/PolynomialConsoleGraph/src/Settings.cpp
-HEADER_CXX = ./src/cpp/GraphRef.h ./src/cpp/extern_c.h ./src/cpp/Cli.h ./src/cpp/PolynomialConsoleGraph/src/Compute.h ./src/cpp/PolynomialConsoleGraph/src/Draw.h ./src/cpp/PolynomialConsoleGraph/src/Settings.h
+HEADER_CXX = ./src/cpp/GraphRef.h ./src/cpp/extern_c.h ./src/cpp/Constants.h ./src/cpp/Cli.h ./src/cpp/PolynomialConsoleGraph/src/Compute.h ./src/cpp/PolynomialConsoleGraph/src/Draw.h ./src/cpp/PolynomialConsoleGraph/src/Settings.h
 OBJ = $(C_SRC:.c=.o) $(CXX_SRC:.cpp=.o)
 EXEC = ./bin/nbs_dsp
 
