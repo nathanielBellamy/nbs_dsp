@@ -7,7 +7,8 @@ extern "C" {
 
 // must match definition in src/c/visual.h
 #define RASTER_SIDE_LENGTH 156
-#include"../c/dbg.h"
+#include "../c/dbg.h"
+#include "Constants.h"
 
 void bar();
 void drawBorder(
@@ -32,9 +33,9 @@ void updateHeader(
   DBG* debug
 );
 void updateGraph(
-  double (*polynomialArray)[16][16],
+  double (*polynomialArray)[POLYNOMIAL_ARRAY_LENGTH][POLYNOMIAL_DEGREE_P1],
   char (*raster)[RASTER_SIDE_LENGTH][RASTER_SIDE_LENGTH],
-  char (*graphNext)[32][64],
+  char (*graphNext)[EQ_IMAGE_HEIGHT][EQ_IMAGE_WIDTH],
   int offsetX,
   int offsetY,
   void *settingsIn

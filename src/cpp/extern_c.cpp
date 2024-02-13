@@ -1,12 +1,13 @@
 #include<iostream>
 #include<string>
 #include "extern_c.h"
-#include "../cpp/PolynomialConsoleGraph/src/Compute.h"
-#include "../cpp/PolynomialConsoleGraph/src/Draw.h"
-#include "../cpp/PolynomialConsoleGraph/src/Settings.h"
+#include "./PolynomialConsoleGraph/src/Compute.h"
+#include "./PolynomialConsoleGraph/src/Draw.h"
+#include "./PolynomialConsoleGraph/src/Settings.h"
 #include "Cli.h"
 #include "GraphRef.h"
 #include "SF_INFO.h"
+#include "Constants.h"
 
 using namespace std;
 
@@ -133,9 +134,9 @@ void updateHeader(GraphRefHDR header, RasterRef raster, int audioFrameId, DBG* d
 };
 
 void updateGraph(
-  double (*polynomialArray)[16][16],
-  RasterRef raster,
-  GraphRefM graphNext,
+  double (*polynomialArray)[POLYNOMIAL_ARRAY_LENGTH][POLYNOMIAL_DEGREE_P1],
+  char (*raster)[RASTER_SIDE_LENGTH][RASTER_SIDE_LENGTH],
+  char (*graphNextIn)[EQ_IMAGE_HEIGHT][EQ_IMAGE_WIDTH],
   int offsetX,
   int offsetY,
   void* settingsIn
@@ -144,10 +145,13 @@ void updateGraph(
   Settings *settings;
   settings = static_cast<Settings*>(settingsIn);
 
-	double image[64] = { 0 };
+  GraphRefEqIm graphNext;
+  graphNext = static_cast<GraphRefEqIm>(graphNextIn);
+
+	double image[EQ_IMAGE_WIDTH] = { 0 };
 	Compute::piecewiseImage(polynomialArray, &image, settings);
 
-  for (int i = 0; i < 32; i++) // row
+  for (int i = 0; i < EQ_IMAGE_HEIGHT; i++) // row
   {
     Draw::createRowPiecewise(
       &image,
@@ -157,7 +161,7 @@ void updateGraph(
     );
   }
 
-  GraphRef<GraphRefM> 
+  GraphRef<GraphRefEqIm> 
   graphRef(
       "foo",
       graphNext,

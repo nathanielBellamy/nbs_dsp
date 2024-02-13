@@ -1,5 +1,6 @@
 #include<string>
 #include <type_traits>
+#include "Constants.h"
 
 #define GR_H_S 16
 #define GR_H_M 32
@@ -16,6 +17,7 @@ typedef char (*GraphRefS)[GR_H_S][GR_W_S];
 typedef char (*GraphRefM)[GR_H_M][GR_W_M];
 typedef char (*GraphRefL)[GR_H_L][GR_W_L];
 typedef char (*GraphRefHDR)[GR_H_S][RASTER_SIDE_LENGTH];
+typedef char (*GraphRefEqIm)[EQ_IMAGE_HEIGHT][EQ_IMAGE_WIDTH];
 
 // TODO:
 //  - turn on/off printing char
@@ -325,4 +327,41 @@ public:
     {
       updateTextPriv<GraphRefHDR>(raster, patch, offsetY, offsetX, height, width);
     };
+};
+
+template <>
+class GraphRef<GraphRefEqIm>
+{
+  private:
+      GraphRefEqIm patch;
+      int offsetX;
+      int offsetY;
+      int height;
+      int width;
+
+  public:
+      string name;
+      GraphRef(string name, GraphRefEqIm patch, int offsetY, int offsetX)
+        : name(name)
+        , patch(patch)
+        , offsetX(offsetX)
+        , offsetY(offsetY)
+        , height(EQ_IMAGE_HEIGHT)
+        , width(EQ_IMAGE_WIDTH) 
+        {};
+
+      void placeString(string input, int innerOffsetY, int innerOffsetX) // string, row, col
+      { // offset string within patch
+        placeStringPriv<GraphRefEqIm>(input, patch, innerOffsetY, innerOffsetX, height, width);
+      };
+
+      void updateGraph(RasterRef raster)
+      {
+        updateGraphPriv<GraphRefEqIm>(raster, patch, offsetY, offsetX, height, width);
+      };
+
+      void updateText(RasterRef raster)
+      {
+        updateTextPriv<GraphRefEqIm>(raster, patch, offsetY, offsetX, height, width);
+      };
 };

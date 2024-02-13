@@ -10,6 +10,7 @@
 #include <fftw3.h>
 #include "audio.h"
 #include "audio_data.h"
+#include "../cpp/Constants.h"
 
 // following: https://github.com/PortAudio/portaudio/blob/master/examples/pa_fuzz.c
 
@@ -19,7 +20,7 @@ typedef float SAMPLE;
 
 void freeAudioData(AUDIO_DATA *audioData) {
   // printf("\nCleaning up resources...");
-  
+
   free(audioData->buffer);
   fftwf_free(audioData->fft_buffer);
   fftwf_free(audioData->fft_time);
@@ -27,7 +28,7 @@ void freeAudioData(AUDIO_DATA *audioData) {
   fftwf_destroy_plan(audioData->fft_plan_to_freq);
   fftwf_destroy_plan(audioData->fft_plan_to_time);
   sf_close(audioData->file);
-  
+
   // printf("\nDone.");
 };
 
@@ -36,8 +37,6 @@ int init_pa(AUDIO_DATA *audioData, atomic_int *atomicCounter, atomic_int *debugI
   audioData->atomicCounter = atomicCounter;
   audioData->debugInt = debugInt;
   audioData->index = 0;
-  audioData->buffer_frames = 32;
-  audioData->buffer_frames_d2p1 = 17;
 
   // https://svn.ict.usc.edu/svn_vh_public/trunk/lib/vhcl/libsndfile/doc/api.html
   // > When opening a file for read, the format field should be set to zero before calling sf_open().
@@ -50,7 +49,7 @@ int init_pa(AUDIO_DATA *audioData, atomic_int *atomicCounter, atomic_int *debugI
 		puts (sf_strerror (NULL)) ;
     return 1 ;
   };
-  
+
   // Allocate memory for data
   audioData->buffer = (float *) malloc(audioData->sfinfo.frames * audioData->sfinfo.channels * sizeof(float));
   if (!audioData->buffer) {
@@ -64,28 +63,28 @@ int init_pa(AUDIO_DATA *audioData, atomic_int *atomicCounter, atomic_int *debugI
       printf("\nCannot read file");
       return 1;
   }
-  
+
   // allocate memory to compute fast fourier transform in pa_callback
-  audioData->fft_buffer = (float*) fftwf_malloc(sizeof(float) * audioData->buffer_frames * audioData->sfinfo.channels);
-  audioData->fft_time = (float*) fftwf_malloc(sizeof(float) * audioData->buffer_frames);
-  audioData->fft_freq = (fftwf_complex*) fftwf_malloc(sizeof(fftwf_complex) * audioData->buffer_frames_d2p1);
+  audioData->fft_buffer = (float*) fftwf_malloc(sizeof(float) * AUDIO_BUFFER_FRAMES * audioData->sfinfo.channels);
+  audioData->fft_time = (float*) fftwf_malloc(sizeof(float) * AUDIO_BUFFER_FRAMES);
+  audioData->fft_freq = (fftwf_complex*) fftwf_malloc(sizeof(fftwf_complex) * AUDIO_BUFFER_FRAMES_D2P1);
   audioData->fft_plan_to_freq = fftwf_plan_dft_r2c_1d(
-    audioData->buffer_frames, 
+    AUDIO_BUFFER_FRAMES,
     audioData->fft_time,
-    audioData->fft_freq, 
+    audioData->fft_freq,
     FFTW_ESTIMATE
   );
   audioData->fft_plan_to_time = fftwf_plan_dft_c2r_1d(
-    audioData->buffer_frames, 
-    audioData->fft_freq, 
+    AUDIO_BUFFER_FRAMES,
+    audioData->fft_freq,
     audioData->fft_time,
     FFTW_ESTIMATE
   );
-  
+
   return 0;
 }
 
-double magnitude(fftwf_complex* z) 
+double magnitude(fftwf_complex* z)
 {
     return sqrt( z[0]*z[0] + z[1]*z[1] );
 }
@@ -113,7 +112,7 @@ static int callback(const void *inputBuffer, void *outputBuffer,
           *out++ = 0;  /* right - silent */
       }
   }
-  else if (audioData->index > audioData->sfinfo.frames * audioData->sfinfo.channels + 1) 
+  else if (audioData->index > audioData->sfinfo.frames * audioData->sfinfo.channels + 1)
   {
     // audioData->index = 0;
     // return paComplete;
@@ -138,20 +137,27 @@ static int callback(const void *inputBuffer, void *outputBuffer,
       // compute fft
       fftwf_execute(audioData->fft_plan_to_freq);
 
+      // filter frequencies
+      // for ( int i = 10; i < 17; i++ ) //audioData->buffer_frames_d2p1; i++ )
+      // {
+      //   fftwf_complex zero = { 0.0, 0.0 };
+      //   audioData->fft_freq[i] = zero;
+      // }
+
       // - we control neither when nor how frequently this method is called
       //   and we cannot perform any blocking operations here (ie. no mutexs)
       // - so we need a method of ensuring that, when the visual thread loads the values
       //   in atomicEQ, it loads values from a single application of the DFT
       // - we use the atomicEqSync variable to achieve this
-      
+
       int eqSync = atomic_load( audioData->atomicEqSync );
       if ( eqSync == 1 )
       { // visual thread is ready to receive data
         // write data to be read by visual thread
-        for (i = 0; i < audioData->buffer_frames_d2p1; i++)
+        for (i = 0; i < AUDIO_BUFFER_FRAMES_D2P1; i++)
         {
           atomic_store(
-            audioData->atomicEQ + ( i + ( ch * audioData->buffer_frames_d2p1 ) ), 
+            audioData->atomicEQ + ( i + ( ch * AUDIO_BUFFER_FRAMES_D2P1) ),
             magnitude( audioData->fft_freq + i ) * 10000.0 // - atomic_store truncates the double to form an int here
                                                           //   we multiply by a factor here to maintain data
                                                           //   when the float is truncated to an int
@@ -159,10 +165,10 @@ static int callback(const void *inputBuffer, void *outputBuffer,
                                                           //   so this factor will cancel out
           );
         }
-        
+
         // - disable write
         // - visual thread will enable when ready
-        if ( ch == 1 ) // write all channels 
+        if ( ch == 1 ) // write all channels
         {
           atomic_store(
             audioData->atomicEqSync,
@@ -174,13 +180,13 @@ static int callback(const void *inputBuffer, void *outputBuffer,
       // transform back into time domain
       fftwf_execute(audioData->fft_plan_to_time);
 
-      // normalize fft_time 
+      // normalize fft_time
       // write out to audioData->fft_buffer
       for (i = 0; i < framesPerBuffer; i++) {
         audioData->fft_buffer[i * audioData->sfinfo.channels + ch] = audioData->fft_time[i] / 32.0f;
       }
     }
-    
+
     // audioData->fft_buffer --copy--> paOut
     for (i = 0; i < framesPerBuffer; i++) {
       for (int ch = 0; ch < audioData->sfinfo.channels; ch++) {
@@ -221,14 +227,14 @@ void *audioMain(void *audioData_)
   outputParameters.sampleFormat = PA_SAMPLE_TYPE;
   outputParameters.suggestedLatency = Pa_GetDeviceInfo( outputParameters.device )->defaultLowOutputLatency;
   outputParameters.hostApiSpecificStreamInfo = NULL;
-  
+
   err = Pa_OpenStream(
             &stream,
             &inputParameters,
             &outputParameters,
             audioData->sfinfo.samplerate,
-            audioData->buffer_frames,
-            paNoFlag, /* paClipOn, */   
+            AUDIO_BUFFER_FRAMES,
+            paNoFlag, /* paClipOn, */
             callback,
             audioData );
   if( err != paNoError ) goto error;

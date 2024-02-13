@@ -10,6 +10,10 @@
 #include "visual.h"
 #include "visual_data.h"
 #include "../cpp/extern_c.h"
+#include "../cpp/Constants.h"
+
+#define FRAME_RATE     8000  // how frequently we render
+#define READ_RATE   8000000  // how frequently we read EQ data written by audio thread
 
 // extern_c.h
 void drawBorder(
@@ -34,9 +38,9 @@ void updateHeader(
   DBG* debug
 );
 void updateGraph(
-  double (*polynomialArray)[16][16],
+  double (*polynomialArray)[POLYNOMIAL_ARRAY_LENGTH][POLYNOMIAL_DEGREE_P1],
   char (*raster)[RASTER_SIDE_LENGTH][RASTER_SIDE_LENGTH],
-  char (*graphNext)[32][64],
+  char (*graphNext)[EQ_IMAGE_HEIGHT][EQ_IMAGE_WIDTH],
   int offsetX,
   int offsetY,
   void *settingsIn
@@ -50,14 +54,30 @@ double fallFunction(double t)
 // inbetween reads of DFT data
 {
   // return (1.0 - 0.8 * t);
-  // return exp(-t);
-  return 2.0 - exp( 0.3 * t );
+  return exp(-t);
 }
 
-#define FRAME_RATE 125 // how frequently we render
-#define READ_RATE 101111  // how frequently we read EQ data written by audio thread
+double
+localAverage(double (*bufferAtomicEq_norm)[AUDIO_BUFFER_FRAMES_D2P1_X2], int idx, int ch, DBG* debug)
+{
+  double total;
+  total = 0.0;
 
-void *visualMain(void *visualData_) 
+  int idxStep;
+  idxStep = (idx * AUDIO_BUFFER_FRAMES_D2P1_DPAL) + (ch * AUDIO_BUFFER_FRAMES_D2P1);
+
+  for (int i = idxStep; i < idxStep + AUDIO_BUFFER_FRAMES_D2P1_DPAL; i++)
+  {
+    // if ( ch == 1)
+    // {
+    //   debug->double_ = (*bufferAtomicEq_norm)[i];
+    // }
+    total += (*bufferAtomicEq_norm)[i];
+  }
+  return total / AUDIO_BUFFER_FRAMES_D2P1_DPAL;
+}
+
+void *visualMain(void *visualData_)
 {
   DBG debug;
 
@@ -66,15 +86,17 @@ void *visualMain(void *visualData_)
   int readCounter = -1;
 
   VISUAL_DATA *visualData = (VISUAL_DATA *) visualData_;
+
+  //
   // NOTE:
   // - values are loaded from the visual thread into bufferAtomicEq_norm
   // - they are then normalized in place
   // - on loops when new values are not fetched, the values in bufferAtomicEq_norm
   //   are incrementally shifted index-wise toward 0 values in a straight-line homotopy
   //
-  // 34 = 2 * audioData->buffer_frames_d2p1
-  int bufferAtomicEq_load[34] = { 0.0 };
-  double bufferAtomicEq_norm[34] = { 0.0 };
+
+  int bufferAtomicEq_load[AUDIO_BUFFER_FRAMES_D2P1_X2] = { 0.0 };
+  double bufferAtomicEq_norm[AUDIO_BUFFER_FRAMES_D2P1_X2] = { 0.0 };
 
   // TODO:
   // - get and update settings from user
@@ -88,30 +110,31 @@ void *visualMain(void *visualData_)
 	settings.yMin = 0.0;
 	settings.yMax = 1.1;
 	settings.epsilon = 0.01;
-  settings.displayWidth = 64;
-  settings.displayHeight = 32;
+  // TODO: move these off settings?
+  settings.displayWidth = EQ_IMAGE_WIDTH;
+  settings.displayHeight = EQ_IMAGE_WIDTH;
   settings.stepWidth = stepWidth((void *) &settings);
   settings.stepHeight = stepHeight((void *) &settings);
   settings.xStepCount = xStepCount((void *) &settings);
 
   char raster[RASTER_SIDE_LENGTH][RASTER_SIDE_LENGTH] = {{'\0'}};
 
-  char graphNextL[32][64] = {{'L'}};
-  char graphNextR[32][64] = {{'R'}};
-  
-  double polynomialArrayL[16][16] = {{ 0.0 }};
-  double polynomialArrayR[16][16] = {{ 0.0 }};
+  char graphNextL[EQ_IMAGE_HEIGHT][EQ_IMAGE_WIDTH] = {{'L'}};
+  char graphNextR[EQ_IMAGE_HEIGHT][EQ_IMAGE_WIDTH] = {{'R'}};
+
+  double polynomialArrayL[POLYNOMIAL_ARRAY_LENGTH][POLYNOMIAL_DEGREE_P1] = {{ 0.0 }};
+  double polynomialArrayR[POLYNOMIAL_ARRAY_LENGTH][POLYNOMIAL_DEGREE_P1] = {{ 0.0 }};
 
   //
   // RENDER
-  // 
+  //
   system("clear");
 
   // hide cursor
   // printf("\e[?25l");
 
   char header[16][RASTER_SIDE_LENGTH] = {{ '\0' }};
-  
+
   drawBorder(&raster, '|', '~', '=', 8, 156, 0, 0);
   drawHeader((void*) &visualData->audioData->sfinfo, &header, &raster);
 
@@ -128,30 +151,30 @@ void *visualMain(void *visualData_)
   // init playback loop
   while( true )
   {
-    frameCounter += 1;  // counter between renders 
+    frameCounter += 1;  // counter between renders
     readCounter += 1;   // counter between reads
 
     // load EQ data from audio thread
     int eqSync = atomic_load( visualData->atomicEqSync );
     debug.int_ = eqSync;
-    if ( readCounter > READ_RATE && eqSync == 0 ) 
+    if ( readCounter > READ_RATE && eqSync == 0 )
     {
-      int maxMag[2] = { 1 }; // - each time we load we need to normalize 
+      int maxMag[2] = { 1 }; // - each time we load we need to normalize
                                  //   all values by the max value for that channel
 
-      // load data from visual thread
-      for (int i = 0; i < visualData->buffer_frames_d2p1; i++)
+      // load data from audio thread
+      for (int i = 0; i < AUDIO_BUFFER_FRAMES_D2P1; i++)
       {
         for (int ch = 0; ch < 2; ch++)
         {
-          int index = i + (ch * visualData->buffer_frames_d2p1);
+          int index = i + (ch * AUDIO_BUFFER_FRAMES_D2P1);
           int loadedVal = atomic_load(visualData->atomicEQ + index );
           bool validVal = loadedVal > 0 && loadedVal < 1000;
           if ( validVal )
           {
             bufferAtomicEq_load[index] = loadedVal;
           }
-          else 
+          else
           {
             bufferAtomicEq_load[index] = 0;
           }
@@ -163,11 +186,11 @@ void *visualMain(void *visualData_)
       }
 
       // normalize loaded data while copying into render target array
-      for (int i = 0; i < visualData->buffer_frames_d2p1; i++)
+      for (int i = 0; i < AUDIO_BUFFER_FRAMES_D2P1; i++)
       {
         for (int ch = 0; ch < 2; ch++)
         {
-          int index = i + (ch * visualData->buffer_frames_d2p1);
+          int index = i + (ch * AUDIO_BUFFER_FRAMES_D2P1);
           double res = (double)bufferAtomicEq_load[index] / maxMag[ch];
           if ( res > 1.0 || res < 0.0)
           {
@@ -186,24 +209,23 @@ void *visualMain(void *visualData_)
         1
       );
     }
-    
+
     if ( frameCounter == FRAME_RATE )
     {
-      
+
       double t = (double)readCounter / READ_RATE;
-      debug.double_ = t;
 
       // prep polynomials to graph
-      for (int i = 0; i < 16; i++)
+      for (int i = 0; i < POLYNOMIAL_ARRAY_LENGTH; i++)
       {
-        double val = fallFunction( t ) * bufferAtomicEq_norm[i + 0]; // fall towards 0 inbetween reads
-        polynomialArrayL[16-i-1][0] = val;
+        double val = fallFunction( t ) * localAverage(&bufferAtomicEq_norm, i, 0, &debug); // fall towards 0 inbetween reads
+        polynomialArrayL[POLYNOMIAL_ARRAY_LENGTH-i-1][0] = val;
       }
 
-      for (int i = 0; i < 16; i++)
+      for (int i = 0; i < POLYNOMIAL_ARRAY_LENGTH; i++)
       {
-        double val = fallFunction( t ) * bufferAtomicEq_norm[i + 16];
-        polynomialArrayR[16-i-1][0] = val;
+        double val = fallFunction( t ) * localAverage(&bufferAtomicEq_norm, i, 1, &debug);
+        polynomialArrayR[POLYNOMIAL_ARRAY_LENGTH-i-1][0] = val;
       }
 
       // prep audioFrameId to display in header
@@ -223,8 +245,8 @@ void *visualMain(void *visualData_)
         &polynomialArrayR,
         &raster,
         &graphNextR,
-        11,
-        80,
+        27,
+        5,
         (void *) &settings
       );
 
