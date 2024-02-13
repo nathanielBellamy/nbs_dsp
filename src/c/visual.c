@@ -12,6 +12,9 @@
 #include "../cpp/extern_c.h"
 #include "../cpp/Constants.h"
 
+#define FRAME_RATE 125 // how frequently we render
+#define READ_RATE 101111  // how frequently we read EQ data written by audio thread
+
 // extern_c.h
 void drawBorder(
   char (*raster)[RASTER_SIDE_LENGTH][RASTER_SIDE_LENGTH],
@@ -74,9 +77,6 @@ localAverage(double (*bufferAtomicEq_norm)[AUDIO_BUFFER_FRAMES_D2P1_X2], int idx
   }
   return total / AUDIO_BUFFER_FRAMES_D2P1_DPAL;
 }
-
-#define FRAME_RATE 125 // how frequently we render
-#define READ_RATE 101111  // how frequently we read EQ data written by audio thread
 
 void *visualMain(void *visualData_)
 {
